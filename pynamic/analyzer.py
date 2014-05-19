@@ -42,12 +42,18 @@ class Analyzer(object):
     def show(self, method, param_list=None):
         if method == 'histogram':
             self.histogram(param_list=param_list, show=True)
+        elif method == 'plot':
+            self.plot()
         elif method == 'chi':
             self.chi(param_list=param_list, show=True)
 
     def save(self, method, param_list=None, prefix='hist'):
         if method == 'histogram':
             self.histogram(save=True, show=False, param_list=param_list, prefix=prefix)
+        elif method == 'plot':
+            self.plot(save=True, show=False)
+        elif method == 'chi':
+            self.chi(param_list=param_list, save=True, show=False)
 
     def chi(self, param_list=None, show=True, save=False):
 
@@ -58,8 +64,6 @@ class Analyzer(object):
     def histogram(self, param_list=None, save=False, show=True, prefix='hist'):
 
         for i in range(1, len(self.optimizier.params.all(True))):
-            # pylab.figure()
-
             param = self.optimizier.params.all(True)[i]
 
             if param_list and param.name not in param_list:
@@ -78,7 +82,8 @@ class Analyzer(object):
                 pylab.savefig('{0}_{1:s}.png'.format(prefix, param.name))
             if show:
                 pylab.show()
-            # pylab.close()
+
+            pylab.close()
 
     def step(self, param_list=None, save=False, show=True, prefix='step'):
 
@@ -114,5 +119,7 @@ class Analyzer(object):
 
         if save:
             pylab.savefig('{0}.png'.format(prefix))
+        if show:
+            pylab.show()
 
-        pylab.show()
+        pylab.close()
