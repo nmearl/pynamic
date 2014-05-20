@@ -20,7 +20,7 @@ class Optimizer(object):
         self.rv_body = rv_body
         self.output_prefix = output_prefix
 
-        self.chain = np.array([]).reshape(0, len(self.params.all(True))+1)
+        self.chain = np.empty([1, 1 + len(self.params.all(True))])
 
         self.maxlnp = 0.0
         self.bestpos = np.zeros(len(self.params.all(True)))

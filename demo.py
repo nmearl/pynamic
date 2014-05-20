@@ -20,7 +20,7 @@ watcher = Progress(optimizer)
 watcher.start()
 
 # Run the optimizer using the emcee hammer algorithm
-optimizer.run('multinest', nprocs=2)
+optimizer.run('emcee', nprocs=2, niterations=1)
 
 # Stop the watcher
 watcher.stop()
@@ -34,7 +34,7 @@ analyzer = Analyzer(optimizer)
 # Report the results to the screen, and save them
 analyzer.report()
 
-print("Generating histograms.")
 # Now we can make some histrograms
-# analyzer.show('histogram')
-# analyzer.show('chi')
+analyzer.save('histogram')
+analyzer.save('step')
+analyzer.show('plot')

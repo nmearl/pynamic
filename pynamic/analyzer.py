@@ -1,5 +1,6 @@
 __author__ = 'nmearl'
 
+import os
 import numpy as np
 import pylab
 
@@ -12,8 +13,10 @@ class Analyzer(object):
         # burnin = int(0.5 * len(self.optimizier.chain))
         self.samples = self.optimizier.chain
 
-        if path and not optimizer.chain:
+        if path:
             self.samples = np.load(path)
+
+            print(self.samples.shape)
 
         self.results = map(lambda v: (v[1], v[2] - v[1], v[1] - v[0]),
                            zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
@@ -48,6 +51,9 @@ class Analyzer(object):
             self.chi(param_list=param_list, show=True)
 
     def save(self, method, param_list=None, prefix='hist'):
+        if os.path.exists("./plots"):
+            os.mkdir("./plots")
+
         if method == 'histogram':
             self.histogram(save=True, show=False, param_list=param_list, prefix=prefix)
         elif method == 'plot':
@@ -79,7 +85,7 @@ class Analyzer(object):
             pylab.tight_layout()
 
             if save:
-                pylab.savefig('{0}_{1:s}.png'.format(prefix, param.name))
+                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix, param.name))
             if show:
                 pylab.show()
 
@@ -105,7 +111,7 @@ class Analyzer(object):
             pylab.tight_layout()
 
             if save:
-                pylab.savefig('{0}_{1:s}.png'.format(prefix, param.name))
+                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix, param.name))
             if show:
                 pylab.show()
 
@@ -118,7 +124,7 @@ class Analyzer(object):
         pylab.plot(self.optimizier.photo_data[0], mod_flux, 'r')
 
         if save:
-            pylab.savefig('{0}.png'.format(prefix))
+            pylab.savefig('./plots/{0}.png'.format(prefix))
         if show:
             pylab.show()
 
