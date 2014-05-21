@@ -42,7 +42,7 @@ void start(double *time, int time_size,
         // Evaluate the flux at time t0 using the getBaryLT() member method
         // of NBodyState which returns NX3 array of barycentric, light-time
         // corrected coordinates
-        state(time[i], maxh, orbit_error, 1.0e-20);
+        state(time[i], maxh, orbit_error, 1.0e-10);
 
         // Now get the flux at the new time
         mod_flux[i] = occultn(state.getBaryLT(),radii,u1,u2,fluxes,N);

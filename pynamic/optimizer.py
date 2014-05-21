@@ -96,6 +96,7 @@ class Optimizer(object):
         # Initialize the walkers
         theta = self.params.get_flat(can_vary=True)
         ndim = len(theta)
+        theta[theta == 0.0] = 1.0e-10
         pos0 = [theta + theta * 1.0e-3 * np.random.randn(ndim)
                 for i in range(nwalkers)]
 

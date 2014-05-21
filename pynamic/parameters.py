@@ -54,6 +54,13 @@ class Parameters(object):
             p = self.all(True)[i]
             p.value = theta[i]
 
+    def save(self):
+        with open("current.out", "w") as f:
+            for param in self.odict.values():
+                f.write("{0:11s} {1:12g} {2:12g} {3:12g} {4:4d}\n".format(
+                    param.name, param.value, param.min, param.max, param.vary
+                ))
+
 
 class Parameter(object):
 

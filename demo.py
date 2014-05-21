@@ -6,14 +6,14 @@ from pynamic.analyzer import Analyzer
 from pynamic.watcher import Progress
 
 # Setup the parameters object
-params = Parameters('input/test.inp')
+params = Parameters('input/koi3151.inp')
 
 # Setup the optimizer, including adding the photometric and rv data
 optimizer = Optimizer(params=params,
-                      photo_data_file='data/005897826_part_llc.txt',
-                      rv_data_file='data/005897826_rv.dat',
-                      rv_body=3,
-                      output_prefix='kep126')
+                      photo_data_file='data/009632895_sclc.dat',
+                      rv_data_file='data/009632895_rv.dat',
+                      rv_body=1,
+                      output_prefix='koi3151')
 
 # Start the watcher so we can see what's going on
 watcher = Progress(optimizer)
@@ -35,6 +35,6 @@ analyzer = Analyzer(optimizer)
 analyzer.report()
 
 # Now we can make some histrograms
-analyzer.save('histogram')
-analyzer.save('step')
+# analyzer.save('histogram')
+# analyzer.save('step')
 analyzer.show('plot')

@@ -34,6 +34,7 @@ class Progress(Watcher):
                 # self.optimizer.save()
 
     def iterprint(self):
+        self.optimizer.params.save()
         nbodies = int(self.optimizer.params.get('nbodies').value)
 
         masses = np.array([self.optimizer.params.get('mass_{0}'.format(i)).value for i in range(nbodies)])
