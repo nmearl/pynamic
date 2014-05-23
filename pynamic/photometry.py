@@ -5,14 +5,17 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 import sys
 from multiprocessing import Pool
+import os
 
+path = os.path.dirname(os.path.realpath(__file__)).split('/')[:-1]
+path = '/'.join(map(str, path))
 
 if sys.platform == 'darwin':
     # print("It seems you're on mac, loading mac libraries...")
-    lib = ctypes.cdll.LoadLibrary('lib/photodynam-mac.so')
+    lib = ctypes.cdll.LoadLibrary(path + '/lib/photodynam-mac.so')
 else:
     # print("It seems you're on linux, loading linux libraries...")
-    lib = ctypes.cdll.LoadLibrary('lib/photodynam.so')
+    lib = ctypes.cdll.LoadLibrary(path + '/lib/photodynam.so')
 
 start = lib.start
 
