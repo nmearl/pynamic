@@ -7,7 +7,7 @@ import numpy as np
 import os
 # External optimizer imports
 import emcee
-import pymultinest
+# import pymultinest
 
 
 class Optimizer(object):
@@ -49,6 +49,12 @@ class Optimizer(object):
 
         return mod_flux[flux_inds], mod_rv[rv_inds]
 
+    def filled_rv_model(self, nprocs=1):
+        flux_x = np.array(self.photo_data[0])
+        mod_flux, mod_rv = photometry.generate(self.params, flux_x, self.rv_body, nprocs)
+
+        return mod_rv
+
     def _iterout(self, tlnl, theta, mod_flux):
         self.maxlnp = tlnl
         self.bestpos = theta
@@ -72,7 +78,7 @@ class Optimizer(object):
             #     return -np.inf
 
             params.update_parameters(dtheta)
-            mod_flux, mod_rv = self.model(nprocs)
+            mod_flux, mod_rv = self.model(1)
 
             flnl = (-0.5 * ((mod_flux - self.photo_data[1]) / self.photo_data[2])**2)
             rvlnl = (-0.5 * ((mod_rv - self.rv_data[1]) / self.rv_data[2])**2)
@@ -105,7 +111,7 @@ class Optimizer(object):
                                         args=(self.params, nprocs))
 
         # Every iteration, save out chain
-        for pos, lnp, state in sampler.sample(pos0, iterations=niterations, storechain=False):
+        for pos, lnp, state in sampler.sample(pos0, iterations=niterations, storechain=False, threads=nprocs):
             maxlnprob = np.argmax(lnp)
             bestpos = pos[maxlnprob, :]
             self.params.update_parameters(bestpos)

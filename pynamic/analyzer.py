@@ -16,8 +16,6 @@ class Analyzer(object):
         if path:
             self.samples = np.load(path)
 
-            print(self.samples.shape)
-
         self.results = map(lambda v: (v[1], v[2] - v[1], v[1] - v[0]),
                            zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
                                               axis=0)))
@@ -45,8 +43,10 @@ class Analyzer(object):
     def show(self, method, param_list=None):
         if method == 'histogram':
             self.histogram(param_list=param_list, show=True)
-        elif method == 'plot':
-            self.plot()
+        elif method == 'flux':
+            self.plot_flux()
+        elif method == 'rv':
+            self.plot_rv()
         elif method == 'chi':
             self.chi(param_list=param_list, show=True)
 
@@ -56,8 +56,10 @@ class Analyzer(object):
 
         if method == 'histogram':
             self.histogram(save=True, show=False, param_list=param_list, prefix=prefix)
-        elif method == 'plot':
-            self.plot(save=True, show=False)
+        elif method == 'flux':
+            self.plot_flux(save=True, show=False)
+        elif method == 'rv':
+            self.plot_rv(save=True, show=False)
         elif method == 'chi':
             self.chi(param_list=param_list, save=True, show=False)
 
@@ -117,11 +119,24 @@ class Analyzer(object):
 
             pylab.close()
 
-    def plot(self, save=False, show=True, prefix='plot'):
+    def plot_flux(self, save=False, show=True, prefix='plot_flux'):
         mod_flux, mod_rv = self.optimizier.model()
 
         pylab.plot(self.optimizier.photo_data[0], self.optimizier.photo_data[1], 'k.')
         pylab.plot(self.optimizier.photo_data[0], mod_flux, 'r')
+
+        if save:
+            pylab.savefig('./plots/{0}.png'.format(prefix))
+        if show:
+            pylab.show()
+
+        pylab.close()
+
+    def plot_rv(self, save=False, show=True, prefix='plot_rv'):
+        mod_rv = self.optimizier.filled_rv_model()
+
+        pylab.plot(self.optimizier.rv_data[0], self.optimizier.rv_data[1], 'k.')
+        pylab.plot(self.optimizier.photo_data[0], mod_rv, 'r')
 
         if save:
             pylab.savefig('./plots/{0}.png'.format(prefix))

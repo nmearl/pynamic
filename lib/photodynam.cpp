@@ -1,6 +1,6 @@
 #include "n_body_state.h"
 #include "n_body_lc.h"
-#include "omp.h"
+//#include "omp.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
