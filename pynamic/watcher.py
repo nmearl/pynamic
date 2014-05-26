@@ -2,6 +2,7 @@ __author__ = 'nmearl'
 
 import threading
 import numpy as np
+import datetime
 
 
 class Watcher(threading.Thread):
@@ -53,8 +54,9 @@ class Progress(Watcher):
         ma = np.array([self.optimizer.params.get('ma_{0}'.format(i)).value for i in range(1, nbodies)])
 
         print('=' * 83)
-        print('Likelihood: {0} | Red. Chisq: {1}'.format(
-            self.maxlnp, self.optimizer.redchisq))#, percomp * 100, time.strftime('%H:%M:%S', time.gmtime(tleft))))
+        print('Likelihood: {0} | Red. Chisq: {1} | {2}'.format(
+            self.maxlnp, self.optimizer.redchisq,
+            str(datetime.datetime.now().time())))  #, percomp * 100, time.strftime('%H:%M:%S', time.gmtime(tleft))))
         print('-' * 83)
         print('System parameters')
         print('-' * 83)

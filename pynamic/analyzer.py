@@ -51,7 +51,7 @@ class Analyzer(object):
             self.chi(param_list=param_list, show=True)
 
     def save(self, method, param_list=None, prefix='hist'):
-        if os.path.exists("./plots"):
+        if not os.path.exists("./plots"):
             os.mkdir("./plots")
 
         if method == 'histogram':
