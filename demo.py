@@ -4,6 +4,7 @@ from pynamic.optimizer import Optimizer
 from pynamic.parameters import Parameters
 from pynamic.analyzer import Analyzer
 from pynamic.watcher import Progress
+import time
 
 # Setup the parameters object
 params = Parameters('input/koi126.inp')
@@ -15,18 +16,21 @@ optimizer = Optimizer(params=params,
                       rv_body=3,
                       output_prefix='koi126')
 
+now = time.time()
 # Start the watcher so we can see what's going on
-# watcher = Progress(optimizer)
-# watcher.start()
-#
-# # Run the optimizer using the emcee hammer algorithm
-# optimizer.run('emcee', nprocs=2, niterations=10)
-#
-# # Stop the watcher
-# watcher.stop()
-#
-# # Save out the results for later analysis
-# optimizer.save()
+watcher = Progress(optimizer)
+watcher.start()
+
+# Run the optimizer using the emcee hammer algorithm
+optimizer.run('emcee', nprocs=2, niterations=2)
+
+# Stop the watcher
+watcher.stop()
+
+print("Time: {0}".format(time.time() - now))
+
+# Save out the results for later analysis
+optimizer.save()
 
 # Now let's analyze the results. Pass the optimizer object to the analyzer
 analyzer = Analyzer(optimizer)

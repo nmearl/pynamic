@@ -8,6 +8,7 @@ import os
 # External optimizer imports
 import emcee
 # import pymultinest
+from pathos.multiprocessing import ProcessingPool as Pool
 
 
 class Optimizer(object):
@@ -78,16 +79,13 @@ class Optimizer(object):
             #     return -np.inf
 
             params.update_parameters(dtheta)
-            mod_flux, mod_rv = self.model(1)
+            mod_flux, mod_rv = self.model()
 
             flnl = (-0.5 * ((mod_flux - self.photo_data[1]) / self.photo_data[2])**2)
             rvlnl = (-0.5 * ((mod_rv - self.rv_data[1]) / self.rv_data[2])**2)
             tlnl = np.sum(flnl) + np.sum(rvlnl)
 
             # iterprint(theta, np.sum(flnl) + np.sum(rvlnl), output_name)
-            # Check to see if this is the best position
-            if tlnl > self.maxlnp:
-                self._iterout(tlnl, dtheta, mod_flux)
 
             return np.sum(flnl) + np.sum(rvlnl)
 
@@ -108,13 +106,18 @@ class Optimizer(object):
 
         # Setup the sampler
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
-                                        args=(self.params, nprocs))
+                                        args=(self.params, nprocs), threads=nprocs, pool=Pool(nprocs))
 
         # Every iteration, save out chain
-        for pos, lnp, state in sampler.sample(pos0, iterations=niterations, storechain=False, threads=nprocs):
+        for pos, lnp, state in sampler.sample(pos0, iterations=niterations, storechain=False):
             maxlnprob = np.argmax(lnp)
             bestpos = pos[maxlnprob, :]
             self.params.update_parameters(bestpos)
+
+            # Check to see if this is the best position
+            if lnp[maxlnprob] > self.maxlnp:
+                mod_flux, mod_rv = self.model()
+                self._iterout(lnp[maxlnprob], bestpos, mod_flux)
 
             for k in range(pos.shape[0]):
                 if not np.isnan(lnp[k]):
