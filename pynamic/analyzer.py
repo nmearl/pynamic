@@ -21,7 +21,8 @@ class Analyzer(object):
                                               axis=0)))
 
     def report(self):
-        print("{0:12s} {1:12s} {2:12s} {3:12s}".format('Name', 'Value', 'Err-', 'Err+'))
+        print("{0:12s} {1:12s} {2:12s} {3:12s}".format(
+            'Name', 'Value', 'Err-', 'Err+'))
 
         j = 0
         with open("report_" + self.optimizier.output_prefix + ".out", 'w') as f:
@@ -29,11 +30,14 @@ class Analyzer(object):
                 param = self.optimizier.params.all()[i]
 
                 if param.vary:
-                    print("{0:12s} {1:12g} {2:12g} {3:12g}".format(param.name, self.results[j][0],
-                                                                   self.results[j][1], self.results[j][2]))
+                    print("{0:12s} {1:12g} {2:12g} {3:12g}".format(
+                        param.name, self.results[j][0], self.results[j][1],
+                        self.results[j][2]))
 
-                    f.write("{0:12s} {1:12g} {2:12g} {3:12g}\n".format(param.name, self.results[j][0],
-                                                                       self.results[j][1], self.results[j][2]))
+                    f.write("{0:12s} {1:12g} {2:12g} {3:12g}\n".format(
+                        param.name, self.results[j][0], self.results[j][1],
+                        self.results[j][2]))
+
                     j += 1
                 else:
                     print("{0:12s} {1:12g}".format(param.name, param.value))
@@ -55,7 +59,8 @@ class Analyzer(object):
             os.mkdir("./plots")
 
         if method == 'histogram':
-            self.histogram(save=True, show=False, param_list=param_list, prefix=prefix)
+            self.histogram(save=True, show=False, param_list=param_list,
+                           prefix=prefix)
         elif method == 'flux':
             self.plot_flux(save=True, show=False)
         elif method == 'rv':
@@ -78,16 +83,20 @@ class Analyzer(object):
                 continue
 
             ax = pylab.subplot('111')#.format(res, j+1))
-            ax.hist(self.samples[:, i], 100, color="k", alpha=0.5, histtype="step")
+            ax.hist(self.samples[:, i], 100, color="k", alpha=0.5,
+                    histtype="step")
             ax.axvline(self.results[i][0], color="r", lw=2)
-            ax.axvline(self.results[i][0] + self.results[i][1], color='k', alpha=0.6)
-            ax.axvline(self.results[i][0] - self.results[i][2], color='k', alpha=0.6)
+            ax.axvline(self.results[i][0] + self.results[i][1],
+                       color='k', alpha=0.6)
+            ax.axvline(self.results[i][0] - self.results[i][2],
+                       color='k', alpha=0.6)
             ax.set_title("{0:s} Parameter Distribution".format(param.name))
             ax.set_xlim(self.results[i][0] * 0.95, self.results[i][0] * 1.05)
             pylab.tight_layout()
 
             if save:
-                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix, param.name))
+                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix,
+                                                             param.name))
             if show:
                 pylab.show()
 
@@ -104,16 +113,20 @@ class Analyzer(object):
                 continue
 
             ax = pylab.subplot('111')
-            ax.plot(range(len(self.samples)), self.samples[:, i], color="k", alpha=0.5)
+            ax.plot(range(len(self.samples)), self.samples[:, i],
+                    color="k", alpha=0.5)
             ax.axhline(self.results[i][0], color="r", lw=2)
-            ax.axhline(self.results[i][0] + self.results[i][1], color='k', alpha=0.6)
-            ax.axhline(self.results[i][0] - self.results[i][2], color='k', alpha=0.6)
+            ax.axhline(self.results[i][0] + self.results[i][1],
+                       color='k', alpha=0.6)
+            ax.axhline(self.results[i][0] - self.results[i][2],
+                       color='k', alpha=0.6)
             ax.set_title("{0:s} Step".format(param.name))
             # ax.set_xlim(results[k][0] * 0.95, results[k][0] * 1.05)
             pylab.tight_layout()
 
             if save:
-                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix, param.name))
+                pylab.savefig('./plots/{0}_{1:s}.png'.format(prefix,
+                                                             param.name))
             if show:
                 pylab.show()
 
@@ -122,7 +135,8 @@ class Analyzer(object):
     def plot_flux(self, save=False, show=True, prefix='plot_flux'):
         mod_flux, mod_rv = self.optimizier.model()
 
-        pylab.plot(self.optimizier.photo_data[0], self.optimizier.photo_data[1], 'k.')
+        pylab.plot(self.optimizier.photo_data[0],
+                   self.optimizier.photo_data[1], 'k.')
         pylab.plot(self.optimizier.photo_data[0], mod_flux, 'r')
 
         if save:

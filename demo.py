@@ -3,7 +3,7 @@ __author__ = 'nmearl'
 from pynamic.optimizer import Optimizer
 from pynamic.parameters import Parameters
 from pynamic.analyzer import Analyzer
-from pynamic.watcher import Progress
+from pynamic.watcher import Watcher
 import time
 
 # Setup the parameters object
@@ -13,16 +13,15 @@ params = Parameters('input/koi126.inp')
 optimizer = Optimizer(params=params,
                       photo_data_file='data/005897826_part_llc.txt',
                       rv_data_file='data/005897826_rv.dat',
-                      rv_body=3,
-                      output_prefix='koi126')
+                      rv_body=3)
 
 now = time.time()
 # Start the watcher so we can see what's going on
-watcher = Progress(optimizer)
+watcher = Watcher(optimizer)
 watcher.start()
 
 # Run the optimizer using the emcee hammer algorithm
-optimizer.run('emcee', nprocs=2, niterations=2)
+optimizer.run('SLSQP')  #, nprocs=2, niterations=5)
 
 # Stop the watcher
 watcher.stop()
@@ -41,4 +40,4 @@ analyzer.report()
 # Now we can make some histrograms
 # analyzer.save('histogram')
 # analyzer.save('step')
-analyzer.show('rv')
+analyzer.show('flux')

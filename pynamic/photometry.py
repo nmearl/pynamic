@@ -60,17 +60,19 @@ def run(inputs):
 
 
 def generate(params, time, rv_body, nprocs=1):
-    N, t0, maxh, orbit_error = int(params.get('nbodies').value), \
-                               params.get('epoch').value,\
-                               params.get('max_h').value,\
-                               params.get('orbit_error').value
+    N, t0, maxh, orbit_error = (int(params.get('nbodies').value),
+                                params.get('epoch').value,
+                                params.get('max_h').value,
+                                params.get('orbit_error').value)
 
-    masses = np.array([params.get('mass_{0}'.format(i)).value for i in range(N)])
-    radii = np.array([params.get('radius_{0}'.format(i)).value for i in range(N)])
-    fluxes = np.array([params.get('flux_{0}'.format(i)).value for i in range(N)])
+    masses = np.array([params.get('mass_{0}'.format(i)).value
+                       for i in range(N)])
+    radii = np.array([params.get('radius_{0}'.format(i)).value
+                      for i in range(N)])
+    fluxes = np.array([params.get('flux_{0}'.format(i)).value
+                       for i in range(N)])
     u1 = np.array([params.get('u1_{0}'.format(i)).value for i in range(N)])
     u2 = np.array([params.get('u2_{0}'.format(i)).value for i in range(N)])
-
     a = np.array([params.get('a_{0}'.format(i)).value for i in range(1, N)])
     e = np.array([params.get('e_{0}'.format(i)).value for i in range(1, N)])
     inc = np.array([params.get('inc_{0}'.format(i)).value for i in range(1, N)])
@@ -101,10 +103,6 @@ def generate(params, time, rv_body, nprocs=1):
         p.join()
     else:
         result = map(run, inputs)
-
-    # fluxes = np.array([])
-    # for sub_fluxes in result:
-    #     fluxes = np.append(fluxes, sub_fluxes)
 
     result = np.array(result)
 

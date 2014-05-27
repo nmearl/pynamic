@@ -16,7 +16,8 @@ class Parameters(object):
                 line = line.strip().split()
 
                 self.add(name=line[0],
-                         initvalue=float(line[1]) if line[1] is not "nbodies" else int(line[1]),
+                         initvalue=float(line[1])
+                         if line[1] is not "nbodies" else int(line[1]),
                          min=float(line[2]) if "inf" not in line[2] else -inf,
                          max=float(line[3]) if "inf" not in line[3] else inf,
                          vary=bool(int(line[4])))
@@ -33,19 +34,19 @@ class Parameters(object):
 
     def get_flat(self, can_vary=False):
         if can_vary:
-            return array([x.value for x in self.odict.values() if x.vary is True])
+            return array([x.value for x in self.odict.values() if x.vary])
 
         return array([x.value for x in self.odict.values()])
 
     def all(self, can_vary=False):
         if can_vary:
-            return [x for x in self.odict.values() if x.vary is True]
+            return [x for x in self.odict.values() if x.vary]
 
         return self.odict.values()
 
     def get_bounds(self, can_vary=False):
         if can_vary:
-            return [(x.min, x.max) for x in self.odict.values() if x.vary is True]
+            return [(x.min, x.max) for x in self.odict.values() if x.vary]
 
         return [(x.min, x.max) for x in self.odict.values()]
 
@@ -73,4 +74,8 @@ class Parameter(object):
         self.vary = vary
 
     def __repr__(self):
-        return "{0:12} {1:12g} {2:12g} {3:12g} {4:6}".format(self.name, self.value, self.min, self.max, self.vary)
+        return "{0:12} {1:12g} {2:12g} {3:12g} {4:6}".format(self.name,
+                                                             self.value,
+                                                             self.min,
+                                                             self.max,
+                                                             self.vary)

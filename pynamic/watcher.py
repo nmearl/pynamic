@@ -5,8 +5,7 @@ import numpy as np
 import datetime
 
 
-class Watcher(threading.Thread):
-
+class Progress(threading.Thread):
     def __init__(self, optimizer, verbose=False):
         threading.Thread.__init__(self)
         self.optimizer = optimizer
@@ -18,8 +17,7 @@ class Watcher(threading.Thread):
         self.running = False
 
 
-class Progress(Watcher):
-
+class Watcher(Progress):
     def run(self):
         import time
 
@@ -29,34 +27,45 @@ class Progress(Watcher):
             if not self.running:
                 break
 
-            if self.optimizer.maxlnp != self.maxlnp:
+            if (self.optimizer.maxlnp != self.maxlnp and
+                    np.isfinite(self.optimizer.maxlnp)):
                 self.maxlnp = self.optimizer.maxlnp
                 self.iterprint()
-                # self.optimizer.save()
 
     def iterprint(self):
         self.optimizer.params.save()
         self.optimizer.save()
+        params = self.optimizer.params
 
         nbodies = int(self.optimizer.params.get('nbodies').value)
 
-        masses = np.array([self.optimizer.params.get('mass_{0}'.format(i)).value for i in range(nbodies)])
-        radii = np.array([self.optimizer.params.get('radius_{0}'.format(i)).value for i in range(nbodies)])
-        fluxes = np.array([self.optimizer.params.get('flux_{0}'.format(i)).value for i in range(nbodies)])
-        u1 = np.array([self.optimizer.params.get('u1_{0}'.format(i)).value for i in range(nbodies)])
-        u2 = np.array([self.optimizer.params.get('u2_{0}'.format(i)).value for i in range(nbodies)])
-
-        a = np.array([self.optimizer.params.get('a_{0}'.format(i)).value for i in range(1, nbodies)])
-        e = np.array([self.optimizer.params.get('e_{0}'.format(i)).value for i in range(1, nbodies)])
-        inc = np.array([self.optimizer.params.get('inc_{0}'.format(i)).value for i in range(1, nbodies)])
-        om = np.array([self.optimizer.params.get('om_{0}'.format(i)).value for i in range(1, nbodies)])
-        ln = np.array([self.optimizer.params.get('ln_{0}'.format(i)).value for i in range(1, nbodies)])
-        ma = np.array([self.optimizer.params.get('ma_{0}'.format(i)).value for i in range(1, nbodies)])
+        masses = np.array([params.get('mass_{0}'.format(i)).value
+                           for i in range(nbodies)])
+        radii = np.array([params.get('radius_{0}'.format(i)).value
+                          for i in range(nbodies)])
+        fluxes = np.array([params.get('flux_{0}'.format(i)).value
+                           for i in range(nbodies)])
+        u1 = np.array([params.get('u1_{0}'.format(i)).value
+                       for i in range(nbodies)])
+        u2 = np.array([params.get('u2_{0}'.format(i)).value
+                       for i in range(nbodies)])
+        a = np.array([params.get('a_{0}'.format(i)).value
+                      for i in range(1, nbodies)])
+        e = np.array([params.get('e_{0}'.format(i)).value
+                      for i in range(1, nbodies)])
+        inc = np.array([params.get('inc_{0}'.format(i)).value
+                        for i in range(1, nbodies)])
+        om = np.array([params.get('om_{0}'.format(i)).value
+                       for i in range(1, nbodies)])
+        ln = np.array([params.get('ln_{0}'.format(i)).value
+                       for i in range(1, nbodies)])
+        ma = np.array([params.get('ma_{0}'.format(i)).value
+                       for i in range(1, nbodies)])
 
         print('=' * 83)
         print('Likelihood: {0} | Red. Chisq: {1} | {2}'.format(
             self.maxlnp, self.optimizer.redchisq,
-            str(datetime.datetime.now().time())))  #, percomp * 100, time.strftime('%H:%M:%S', time.gmtime(tleft))))
+            str(datetime.datetime.now().time())))
         print('-' * 83)
         print('System parameters')
         print('-' * 83)
@@ -85,7 +94,8 @@ class Progress(Watcher):
 
         for i in range(nbodies - 1):
             print(
-                '{0:11s} {1:1.5e} {2:1.5e} {3:1.5e} {4:1.5e} {5:1.5e} {6:1.5e}'.format(
+                '{0:11s} {1:1.5e} {2:1.5e} {3:1.5e} '
+                '{4:1.5e} {5:1.5e} {6:1.5e}'.format(
                     str(i + 2), a[i], e[i], inc[i], om[i], ln[i], ma[i]
                 )
             )
