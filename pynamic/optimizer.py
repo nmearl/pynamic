@@ -19,19 +19,16 @@ class Optimizer(object):
         self.rv_body = rv_body
         self.output_prefix = output_prefix
         self.chain = np.zeros([1, 1 + len(self.params.all(True))])
-        self.maxlnp = 0.0
+        self.maxlnp = np.inf
         self.bestpos = np.zeros(len(self.params.all(True)))
         self.redchisq = 0.0
 
     def run(self, method, **kwargs):
         if method == 'mcmc':
-            self.maxlnp = -np.inf
             optimizers.hammer(self, **kwargs)
         elif method == 'multinest':
-            self.maxlnp = -np.inf
             optimizers.multinest(self, **kwargs)
         else:
-            self.maxlnp = np.inf
             optimizers.minimizer(self, method=method, **kwargs)
 
     def save(self):

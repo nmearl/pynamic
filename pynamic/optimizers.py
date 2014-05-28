@@ -13,9 +13,8 @@ import scipy.optimize as op
 
 def lnprior(dtheta, params):
     for i in range(len(dtheta)):
-        all_params = params.all(True)
-
-        if not (all_params[i].min <= dtheta[i] <= all_params[i].max):
+        if not (params[i].min <= dtheta[i] <= params[i].max):
+            # print(params[i].name, params[i].min, dtheta[i], params[i].max)
             return -np.inf
 
     return 0.0
@@ -32,14 +31,14 @@ def lnlike(dtheta, optimizer, nprocs=1):
     tlnl = np.sum(flnl) + np.sum(rvlnl)
 
     # Check to see if this is the best position
-    if tlnl < abs(optimizer.maxlnp):
-        optimizer.iterout(tlnl, dtheta, mod_flux)
+    # if abs(tlnl) < abs(optimizer.maxlnp):
+    # optimizer.iterout(tlnl, dtheta, mod_flux)
 
     return tlnl
 
 
 def lnprob(dtheta, optimizer):
-    lp = lnprior(dtheta, optimizer.params)
+    lp = lnprior(dtheta, optimizer.params.all(True))
 
     if not np.isfinite(lp):
         return -np.inf
@@ -65,6 +64,10 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
         maxlnprob = np.argmax(lnp)
         bestpos = pos[maxlnprob, :]
         optimizer.params.update_parameters(bestpos)
+
+        if abs(lnp[maxlnprob]) < abs(optimizer.maxlnp):
+            mod_flux, mod_rv = optimizer.model(nprocs)
+            optimizer.iterout(lnp[maxlnprob], bestpos, mod_flux)
 
         for k in range(pos.shape[0]):
             if not np.isnan(lnp[k]):
