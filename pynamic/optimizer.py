@@ -24,7 +24,7 @@ class Optimizer(object):
         self.redchisq = 0.0
 
     def run(self, method, **kwargs):
-        if method == 'emcee':
+        if method == 'mcmc':
             self.maxlnp = -np.inf
             optimizers.hammer(self, **kwargs)
         elif method == 'multinest':

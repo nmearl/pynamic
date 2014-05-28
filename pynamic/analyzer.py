@@ -25,7 +25,7 @@ class Analyzer(object):
             'Name', 'Value', 'Err-', 'Err+'))
 
         j = 0
-        with open("report_" + self.optimizier.output_prefix + ".out", 'w') as f:
+        with open("report.out", 'w') as f:
             for i in range(len(self.optimizier.params.all())):
                 param = self.optimizier.params.all()[i]
 
