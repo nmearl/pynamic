@@ -34,7 +34,7 @@ class Optimizer(object):
     def save(self):
         np.save("chain", self.chain)
 
-    def model(self, params, nprocs=1):
+    def model(self, nprocs=1):
         flux_x, rv_x = self.photo_data[0], self.rv_data[0]
         x = np.append(flux_x, rv_x)
         x = np.unique(x[np.argsort(x)])
@@ -42,7 +42,7 @@ class Optimizer(object):
         flux_inds = np.in1d(x, flux_x, assume_unique=True)
         rv_inds = np.in1d(x, rv_x, assume_unique=True)
 
-        mod_flux, mod_rv = photometry.generate(params, x,
+        mod_flux, mod_rv = photometry.generate(self.params, x,
                                                self.rv_body, nprocs)
 
         return mod_flux[flux_inds], mod_rv[rv_inds]

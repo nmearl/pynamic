@@ -21,8 +21,8 @@ def lnprior(dtheta, params):
 
 
 def lnlike(dtheta, optimizer, nprocs=1):
-    # optimizer.params.update_parameters(dtheta)
-    mod_flux, mod_rv = optimizer.model(dtheta, nprocs)
+    optimizer.params.update_parameters(dtheta)
+    mod_flux, mod_rv = optimizer.model(nprocs)
 
     flnl = (-0.5 * ((mod_flux - optimizer.photo_data[1]) /
                     optimizer.photo_data[2]) ** 2)

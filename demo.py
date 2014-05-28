@@ -19,7 +19,7 @@ watcher = Watcher(optimizer)
 watcher.start()
 
 # Run the optimizer using the emcee hammer algorithm
-optimizer.run('mcmc', nprocs=2, niterations=5)
+optimizer.run('mcmc', nprocs=4, niterations=5)
 
 # Stop the watcher
 watcher.stop()
