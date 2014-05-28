@@ -56,8 +56,7 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
             for i in range(nwalkers)]
 
     # Setup the sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
-                                    args=(optimizer.params, optimizer),
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(optimizer,),
                                     threads=nprocs)
 
     # Every iteration, save out chain
