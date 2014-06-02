@@ -23,7 +23,7 @@ class Optimizer(object):
         self.bestpos = np.zeros(len(self.params.all(True)))
         self.redchisq = 0.0
 
-    def run(self, method, **kwargs):
+    def run(self, method='', **kwargs):
         if method == 'mcmc':
             optimizers.hammer(self, **kwargs)
         elif method == 'multinest':

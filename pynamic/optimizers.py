@@ -76,7 +76,7 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
                 optimizer.chain = np.vstack([optimizer.chain, nobj])
 
 
-def minimizer(optimizer, method='SLSQP', nprocs=1):
+def minimizer(optimizer, method='', nprocs=1):
     chi2 = lambda *args: -2 * lnlike(*args)
     theta = optimizer.params.get_flat(can_vary=True)
     result = op.minimize(chi2, theta, args=(optimizer, nprocs),

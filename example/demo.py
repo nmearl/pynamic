@@ -1,19 +1,16 @@
-__author__ = 'nmearl'
-
 from pynamic.optimizer import Optimizer
 from pynamic.parameters import Parameters
 from pynamic.analyzer import Analyzer
 from pynamic.watcher import Watcher
 
-# Setup the parameters object
-params = Parameters('input/koi766.inp')
+# Setup the parameters object by reading in an input file
+params = Parameters('')
 
 # Setup the optimizer, including adding the photometric and rv data
 optimizer = Optimizer(params=params,
-                      photo_data_file='/Users/nmearl/Dropbox/detrend'
-                                      '/final_data/007668648_sclc.dat',
-                      rv_data_file='',  # 'data/005897826_rv.dat',
-                      rv_body=3)
+                      photo_data_file='',
+                      rv_data_file='',
+                      rv_body=1)
 
 # Start the watcher so we can see what's going on
 watcher = Watcher(optimizer)
