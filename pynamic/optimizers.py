@@ -28,6 +28,7 @@ def lnlike(dtheta, optimizer, nprocs=1):
                     optimizer.photo_data[2]) ** 2)
     rvlnl = (-0.5 * ((mod_rv - optimizer.rv_data[1]) /
                      optimizer.rv_data[2]) ** 2)
+
     tlnl = np.sum(flnl) + np.sum(rvlnl)
 
     # Check to see if this is the best position
@@ -78,7 +79,8 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
 def minimizer(optimizer, method='SLSQP', nprocs=1):
     chi2 = lambda *args: -2 * lnlike(*args)
     theta = optimizer.params.get_flat(can_vary=True)
-    result = op.minimize(chi2, theta, args=(optimizer, nprocs), method=method,
+    result = op.minimize(chi2, theta, args=(optimizer, nprocs),
+                         # method=method,
                          bounds=optimizer.params.get_bounds(True))
     optimizer.params.update_parameters(result["x"])
 

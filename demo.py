@@ -6,12 +6,13 @@ from pynamic.analyzer import Analyzer
 from pynamic.watcher import Watcher
 
 # Setup the parameters object
-params = Parameters('input/koi126.inp')
+params = Parameters('input/koi766.inp')
 
 # Setup the optimizer, including adding the photometric and rv data
 optimizer = Optimizer(params=params,
-                      photo_data_file='data/005897826_part_llc.txt',
-                      rv_data_file='data/005897826_rv.dat',
+                      photo_data_file='/Users/nmearl/Dropbox/detrend'
+                                      '/final_data/007668648_sclc.dat',
+                      rv_data_file='',  # 'data/005897826_rv.dat',
                       rv_body=3)
 
 # Start the watcher so we can see what's going on
@@ -19,7 +20,7 @@ watcher = Watcher(optimizer)
 watcher.start()
 
 # Run the optimizer using the emcee hammer algorithm
-optimizer.run('mcmc', nprocs=4, niterations=5)
+optimizer.run('mcmc', nprocs=2, niterations=5)
 
 # Stop the watcher
 watcher.stop()
@@ -34,6 +35,6 @@ analyzer = Analyzer(optimizer)
 analyzer.report()
 
 # Now we can make some histrograms
-analyzer.save('histogram')
-analyzer.save('step')
-# analyzer.show('flux')
+# analyzer.save('histogram')
+# analyzer.save('step')
+analyzer.show('flux')
