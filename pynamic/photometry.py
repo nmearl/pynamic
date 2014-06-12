@@ -89,7 +89,7 @@ def generate(params, time, rv_body, nprocs=1):
             masses, radii, fluxes, u1, u2, a, e, inc, om, ln, ma,
             np.zeros(len(time_chunks[i])),
             np.zeros(len(time_chunks[i])),
-            rv_body - 1
+            rv_body
         ]
         for i in range(nprocs)
     ]

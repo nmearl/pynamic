@@ -3,11 +3,10 @@ __author__ = 'nmearl'
 import numpy as np
 import emcee
 import os
-
 try:
     import pymultinest
 except:
-    print("Unable to import PyMultinest")
+    pass
 import scipy.optimize as op
 
 
@@ -31,6 +30,8 @@ def lnlike(dtheta, optimizer, nprocs=1):
 
     tlnl = np.sum(flnl) + np.sum(rvlnl)
 
+    # optimizer.iterout(tlnl, dtheta, mod_flux)
+
     # Check to see if this is the best position
     # if abs(tlnl) < abs(optimizer.maxlnp):
     # optimizer.iterout(tlnl, dtheta, mod_flux)
@@ -38,17 +39,23 @@ def lnlike(dtheta, optimizer, nprocs=1):
     return tlnl
 
 
-def lnprob(dtheta, optimizer):
+def lnprob(dtheta, optimizer, nprocs=1):
     lp = lnprior(dtheta, optimizer.params.all(True))
 
     if not np.isfinite(lp):
         return -np.inf
 
-    return lp + lnlike(dtheta, optimizer)
+    return lp + lnlike(dtheta, optimizer, nprocs)
 
 
-def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
+def hammer(optimizer, nwalkers=None, niterations=500, nprocs=1):
     # Initialize the walkers
+    if not nwalkers:
+        nwalkers = len(optimizer.params.get_flat(can_vary=True)) ** 2
+
+        if nwalkers % 2 != 0.0:
+            nwalkers += 1
+
     theta = optimizer.params.get_flat(can_vary=True)
     ndim = len(theta)
     theta[theta == 0.0] = 1.0e-10
@@ -64,7 +71,6 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
                                           storechain=False):
         maxlnprob = np.argmax(lnp)
         bestpos = pos[maxlnprob, :]
-        optimizer.params.update_parameters(bestpos)
 
         if abs(lnp[maxlnprob]) < abs(optimizer.maxlnp):
             mod_flux, mod_rv = optimizer.model(nprocs)
@@ -76,13 +82,20 @@ def hammer(optimizer, nwalkers=62, niterations=2, nprocs=1):
                 optimizer.chain = np.vstack([optimizer.chain, nobj])
 
 
-def minimizer(optimizer, method='', nprocs=1):
-    chi2 = lambda *args: -2 * lnlike(*args)
+def minimizer(optimizer, method=None, nprocs=1):
+    chi2 = lambda *args: -2 * lnprob(*args)
     theta = optimizer.params.get_flat(can_vary=True)
     result = op.minimize(chi2, theta, args=(optimizer, nprocs),
-                         # method=method,
-                         bounds=optimizer.params.get_bounds(True))
+                         method=method)
+    # bounds=optimizer.params.get_bounds(True))
     optimizer.params.update_parameters(result["x"])
+    tlnl = -2 * lnlike(result["x"], optimizer)
+
+    mod_flux, mod_rv = optimizer.model(nprocs)
+    optimizer.iterout(tlnl, result["x"], mod_flux)
+
+    nobj = np.append(tlnl, result["x"])
+    optimizer.chain = np.vstack([optimizer.chain, nobj])
 
 
 def multinest(optimizer, nprocs=1):

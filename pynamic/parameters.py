@@ -1,7 +1,7 @@
 __author__ = 'nmearl'
 
 from collections import OrderedDict
-from numpy import inf, array
+import numpy as np
 
 
 class Parameters(object):
@@ -17,12 +17,13 @@ class Parameters(object):
 
                 self.add(name=line[0],
                          initvalue=float(line[1])
-                         if line[1] is not "nbodies" else int(line[1]),
-                         min=float(line[2]) if "inf" not in line[2] else -inf,
-                         max=float(line[3]) if "inf" not in line[3] else inf,
+                         if line[0] is not "nbodies" else int(line[1]),
+                         min=float(line[2]) if "inf" not in line[
+                             2] else -np.inf,
+                         max=float(line[3]) if "inf" not in line[3] else np.inf,
                          vary=bool(int(line[4])))
 
-    def add(self, name, initvalue, min=-inf, max=inf, vary=True):
+    def add(self, name, initvalue, min=-np.inf, max=np.inf, vary=True):
         param = Parameter(name, initvalue, min, max, vary)
         self.odict[name] = param
 
@@ -34,9 +35,9 @@ class Parameters(object):
 
     def get_flat(self, can_vary=False):
         if can_vary:
-            return array([x.value for x in self.odict.values() if x.vary])
+            return np.array([x.value for x in self.odict.values() if x.vary])
 
-        return array([x.value for x in self.odict.values()])
+        return np.array([x.value for x in self.odict.values()])
 
     def all(self, can_vary=False):
         if can_vary:
@@ -72,6 +73,17 @@ class Parameter(object):
         self.min = min
         self.max = max
         self.vary = vary
+
+    def get_real(self):
+        if "mass" in self.name:
+            return self.value / 2.959122E-4
+        elif "radius" in self.name:
+            return self.value / 215.1
+        elif ("inc" in self.name or "om" in self.name or "ln" in self.name
+              or "ma" in self.name):
+            return np.rad2deg(self.value)
+        else:
+            return self.value
 
     def __repr__(self):
         return "{0:12} {1:12g} {2:12g} {3:12g} {4:6}".format(self.name,

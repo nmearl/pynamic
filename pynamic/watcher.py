@@ -13,11 +13,12 @@ class Progress(threading.Thread):
         self.running = True
         self.maxlnp = 0.0
 
-    def stop(self):
-        self.running = False
-
 
 class Watcher(Progress):
+    def stop(self):
+        self.iterprint()
+        self.running = False
+
     def run(self):
         import time
 

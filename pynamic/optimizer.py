@@ -5,7 +5,7 @@ import numpy as np
 
 
 class Optimizer(object):
-    def __init__(self, params, photo_data_file='', rv_data_file='', rv_body=1,
+    def __init__(self, params, photo_data_file='', rv_data_file='', rv_body=0,
                  output_prefix=''):
         self.params = params
         self.photo_data = np.loadtxt(photo_data_file,
@@ -22,8 +22,10 @@ class Optimizer(object):
         self.maxlnp = np.inf
         self.bestpos = np.zeros(len(self.params.all(True)))
         self.redchisq = 0.0
+        self.photo_model_data = np.array([])
+        self.rv_model_data = np.array([])
 
-    def run(self, method='', **kwargs):
+    def run(self, method=None, **kwargs):
         if method == 'mcmc':
             optimizers.hammer(self, **kwargs)
         elif method == 'multinest':
@@ -31,8 +33,11 @@ class Optimizer(object):
         else:
             optimizers.minimizer(self, method=method, **kwargs)
 
-    def save(self):
-        np.save("chain", self.chain)
+    def save(self, chain_out_file="chain.txt", photo_out_file="photo_model.txt",
+             rv_out_file="rv_model.txt"):
+        np.savetxt(chain_out_file, self.chain)
+        np.savetxt(photo_out_file, self.photo_model_data)
+        np.savetxt(rv_out_file, self.rv_model_data)
 
     def model(self, nprocs=1):
         flux_x, rv_x = self.photo_data[0], self.rv_data[0]
@@ -57,8 +62,9 @@ class Optimizer(object):
     def iterout(self, tlnl, theta, mod_flux):
         self.maxlnp = tlnl
         self.bestpos = theta
+        self.params.update_parameters(theta)
         nbodies = int(self.params.get("nbodies").value)
         self.redchisq = np.sum((((self.photo_data[1] - mod_flux) /
                                  self.photo_data[2]) ** 2) /
                                (self.photo_data[1].size - 1 -
-                                (nbodies * 5 + (nbodies - 1) * 6)))
+                                len(self.params.get_flat(True))))
