@@ -70,7 +70,6 @@ class Optimizer(object):
                         self.photo_data[2]) ** 2)
         deg = len(self.params.get_flat(True))
         nu = self.photo_data[1].size - 1 - deg
-
         self.redchisq = chisq / nu
 
         # Update the maxlnp so the Watcher knows to print to screen
