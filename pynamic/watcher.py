@@ -34,8 +34,6 @@ class Watcher(Progress):
                 self.iterprint()
 
     def iterprint(self):
-        self.optimizer.params.save()
-        self.optimizer.save()
         params = self.optimizer.params
 
         nbodies = int(params.get('nbodies').value)

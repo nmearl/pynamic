@@ -73,17 +73,36 @@ class Parameter(object):
         self.min = min
         self.max = max
         self.vary = vary
+        self.upper_error = 0.0
+        self.lower_error = 0.0
+        self.quantile_value = 0.0
 
     def get_real(self):
         if "mass" in self.name:
             return self.value / 2.959122E-4
         elif "radius" in self.name:
-            return self.value / 215.1
+            return self.value * 215.1
         elif ("inc" in self.name or "om" in self.name or "ln" in self.name
               or "ma" in self.name):
             return np.rad2deg(self.value)
         else:
             return self.value
+
+    def get_real_quantile(self):
+        if "mass" in self.name:
+            return np.array([self.quantile_value,
+                             self.upper_error, self.lower_error]) / 2.959122E-4
+        elif "radius" in self.name:
+            return np.array([self.quantile_value,
+                             self.upper_error, self.lower_error]) * 215.1
+        elif ("inc" in self.name or "om" in self.name or "ln" in self.name
+              or "ma" in self.name):
+            return np.rad2deg(np.array([self.quantile_value,
+                                        self.upper_error, self.lower_error]))
+        else:
+            return np.array([self.quantile_value,
+                             self.upper_error, self.lower_error])
+
 
     def __repr__(self):
         return "{0:12} {1:12g} {2:12g} {3:12g} {4:6}".format(self.name,

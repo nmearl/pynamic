@@ -22,8 +22,6 @@ class Optimizer(object):
         self.maxlnp = np.inf
         self.bestpos = np.zeros(len(self.params.all(True)))
         self.redchisq = 0.0
-        self.photo_model_data = np.array([])
-        self.rv_model_data = np.array([])
 
     def run(self, method=None, **kwargs):
         if method == 'mcmc':
@@ -35,10 +33,13 @@ class Optimizer(object):
 
     def save(self, chain_out_file="chain.txt", photo_out_file="photo_model.txt",
              rv_out_file="rv_model.txt"):
+        mod_flux, mod_rv = self.model()
+        mod_rv = self.filled_rv_model()
+
         np.savetxt(chain_out_file, self.chain)
         np.save("chain", self.chain)
-        np.savetxt(photo_out_file, self.photo_model_data)
-        np.savetxt(rv_out_file, self.rv_model_data)
+        np.savetxt(photo_out_file, mod_flux)
+        np.savetxt(rv_out_file, mod_rv)
 
     def model(self, nprocs=1):
         flux_x, rv_x = self.photo_data[0], self.rv_data[0]
@@ -53,20 +54,24 @@ class Optimizer(object):
 
         return mod_flux[flux_inds], mod_rv[rv_inds]
 
-    def filled_rv_model(self, nprocs=1):
-        flux_x = np.array(self.photo_data[0])
-        mod_flux, mod_rv = photometry.generate(self.params, flux_x,
+    def filled_rv_model(self, input_times, nprocs=1):
+        mod_flux, mod_rv = photometry.generate(self.params, input_times,
                                                self.rv_body, nprocs)
 
         return mod_rv
 
     def iterout(self, tlnl, theta, mod_flux):
-        self.maxlnp = tlnl
+        self.params.save()
+        self.save()
         self.bestpos = theta
         self.params.update_parameters(theta)
-        nbodies = int(self.params.get("nbodies").value)
+
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
                         self.photo_data[2]) ** 2)
         deg = len(self.params.get_flat(True))
         nu = self.photo_data[1].size - 1 - deg
+
         self.redchisq = chisq / nu
+
+        # Update the maxlnp so the Watcher knows to print to screen
+        self.maxlnp = tlnl
