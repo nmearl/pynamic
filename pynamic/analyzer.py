@@ -9,21 +9,29 @@ from matplotlib.ticker import MaxNLocator
 
 
 class Analyzer(object):
-
-    def __init__(self, optimizer=None, path=None):
+    def __init__(self, optimizer, path="chain.txt"):
         self.optimizer = optimizer
 
         # burnin = int(0.5 * len(self.optimizer.chain))
         self.samples = self.optimizer.chain
 
         if path:
-            self.samples = np.load(path)
+            self.samples = np.loadtxt(path, ndmin=2)
 
         self.results = map(lambda v: (v[1], v[2] - v[1], v[1] - v[0]),
                            zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
                                               axis=0)))
 
     def report(self):
+        mod_flux, mod_rv = self.optimizer.model()
+        chisq = np.sum(((self.optimizer.photo_data[1] - mod_flux)
+                        / self.optimizer.photo_data[2]) ** 2)
+        deg = len(self.optimizer.params.get_flat(True))
+        nu = self.optimizer.photo_data[1].size - 1.0 - deg
+        redchisq = chisq / nu
+
+        print("Reduced Chi-squared: {0}".format(redchisq))
+
         print("{0:12s} {1:12s} {2:12s} {3:12s}".format(
             'Name', 'Value', 'Err-', 'Err+'))
 
@@ -36,8 +44,8 @@ class Analyzer(object):
                     lower_err = self.results[j][0] / 2.959122E-4
                     upper_err = self.results[j][1] / 2.959122E-4
                 elif "radius" in param.name:
-                    lower_err = self.results[j][0] / 215.1
-                    upper_err = self.results[j][1] / 215.1
+                    lower_err = self.results[j][0] * 215.1
+                    upper_err = self.results[j][1] * 215.1
                 elif ("inc" in param.name or "om" in param.name
                       or "ln" in param.name or "ma" in param.name):
                     lower_err = np.rad2deg(self.results[j][0])
@@ -88,14 +96,12 @@ class Analyzer(object):
             self.chi(param_list=param_list, save=True, show=False)
 
     def chi(self, param_list=None, show=True, save=False):
-
         for i in range(1, len(self.optimizer.params.all(True))):
             pylab.plot(self.samples[:, i], self.samples[:, 0], '+')
             pylab.show()
 
     def histogram(self, param_list=None, save=False, show=True, prefix='hist'):
-
-        for i in range(1, len(self.optimizer.params.all(True))):
+        for i in range(0, len(self.optimizer.params.all(True))):
             param = self.optimizer.params.all(True)[i]
 
             if param_list and param.name not in param_list:
@@ -220,6 +226,11 @@ class Analyzer(object):
                 # scilimits=(0, 0), axis='x')
                 top_plots[j].get_xaxis().get_major_formatter().set_useOffset(
                     False)
+                bottom_plots[j].get_xaxis().get_major_formatter().set_useOffset(
+                    False)
+
+                plt.setp(bottom_plots[j].xaxis.get_majorticklabels(),
+                         rotation=15)
 
             spacing = 0.5
 

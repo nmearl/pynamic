@@ -38,7 +38,7 @@ class Watcher(Progress):
         self.optimizer.save()
         params = self.optimizer.params
 
-        nbodies = int(self.optimizer.params.get('nbodies').value)
+        nbodies = int(params.get('nbodies').value)
 
         masses = np.array([params.get('mass_{0}'.format(i)).value
                            for i in range(nbodies)])

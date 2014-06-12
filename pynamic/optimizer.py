@@ -36,6 +36,7 @@ class Optimizer(object):
     def save(self, chain_out_file="chain.txt", photo_out_file="photo_model.txt",
              rv_out_file="rv_model.txt"):
         np.savetxt(chain_out_file, self.chain)
+        np.save("chain", self.chain)
         np.savetxt(photo_out_file, self.photo_model_data)
         np.savetxt(rv_out_file, self.rv_model_data)
 
@@ -64,7 +65,8 @@ class Optimizer(object):
         self.bestpos = theta
         self.params.update_parameters(theta)
         nbodies = int(self.params.get("nbodies").value)
-        self.redchisq = np.sum((((self.photo_data[1] - mod_flux) /
-                                 self.photo_data[2]) ** 2) /
-                               (self.photo_data[1].size - 1 -
-                                len(self.params.get_flat(True))))
+        chisq = np.sum(((self.photo_data[1] - mod_flux) /
+                        self.photo_data[2]) ** 2)
+        deg = len(self.params.get_flat(True))
+        nu = self.photo_data[1].size - 1 - deg
+        self.redchisq = chisq / nu
