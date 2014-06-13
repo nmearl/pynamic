@@ -18,11 +18,10 @@ class Optimizer(object):
 
         self.rv_body = rv_body
         self.chain = np.zeros([1, 1 + len(self.params.all(True))])
-        self.maxlnp = np.inf
-        self.bestpos = np.zeros(len(self.params.all(True)))
+        self.maxlnp = -np.inf
         self.redchisq = 0.0
 
-        if chain_file:
+        if chain_file is not None:
             self.chain = np.load(chain_file)
 
     def run(self, method=None, **kwargs):
@@ -63,12 +62,16 @@ class Optimizer(object):
 
         return mod_rv
 
+    def update_chain(self, tlnl, theta):
+        nobj = np.append(tlnl, theta)
+        self.chain = np.vstack([self.chain, nobj])
+
     def iterout(self, tlnl=-np.inf, theta=None):
-        if theta:
-            self.params.save()
-            self.save()
-            self.bestpos = theta
-            self.params.update_parameters(theta)
+        if abs(tlnl) > abs(self.maxlnp) or not np.isfinite(tlnl):
+            if theta is not None:
+                self.params.save()
+                self.save()
+                self.params.update_parameters(theta)
 
         mod_flux, mod_rv = self.model()
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
@@ -81,5 +84,6 @@ class Optimizer(object):
         nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
         self.redchisq = chisq / nu
 
-        # Update the maxlnp so the Watcher knows to print to screen
-        self.maxlnp = tlnl
+        if abs(tlnl) > abs(self.maxlnp) or not np.isfinite(tlnl):
+            # Update the maxlnp so the Watcher knows to print to screen
+            self.maxlnp = tlnl

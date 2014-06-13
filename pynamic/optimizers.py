@@ -30,12 +30,6 @@ def lnlike(dtheta, optimizer, nprocs=1):
 
     tlnl = np.sum(flnl) + np.sum(rvlnl)
 
-    # optimizer.iterout(tlnl, dtheta, mod_flux)
-
-    # Check to see if this is the best position
-    # if abs(tlnl) < abs(optimizer.maxlnp):
-    # optimizer.iterout(tlnl, dtheta, mod_flux)
-
     return tlnl
 
 
@@ -72,13 +66,11 @@ def hammer(optimizer, nwalkers=None, niterations=500, nprocs=1):
         maxlnprob = np.argmax(lnp)
         bestpos = pos[maxlnprob, :]
 
-        if abs(lnp[maxlnprob]) < abs(optimizer.maxlnp):
-            optimizer.iterout(lnp[maxlnprob], bestpos)
+        optimizer.iterout(lnp[maxlnprob], bestpos)
 
         for k in range(pos.shape[0]):
             if not np.isnan(lnp[k]):
-                nobj = np.append(lnp[k], pos[k])
-                optimizer.chain = np.vstack([optimizer.chain, nobj])
+                optimizer.update_chain(lnp[k], pos[k])
 
 
 def minimizer(optimizer, method=None, nprocs=1):
@@ -87,13 +79,9 @@ def minimizer(optimizer, method=None, nprocs=1):
     result = op.minimize(chi2, theta, args=(optimizer, nprocs),
                          method=method)
     # bounds=optimizer.params.get_bounds(True))
-    optimizer.params.update_parameters(result["x"])
     tlnl = -2 * lnlike(result["x"], optimizer)
-
     optimizer.iterout(tlnl, result["x"])
-
-    nobj = np.append(tlnl, result["x"])
-    optimizer.chain = np.vstack([optimizer.chain, nobj])
+    optimizer.update_chain(tlnl, result["x"])
 
 
 def multinest(optimizer, nprocs=1):

@@ -243,9 +243,9 @@ class Analyzer(object):
         bottom_plot.errorbar(rv_x, rv_y - mod_rv,
                              yerr=rv_e, color='k', fmt='o')
         bottom_plot.axhline(0.0, ls='--', color='k', alpha=0.5)
-        # pylab.savefig("rv_full.png", dpi=150,
-        # bbox_inches='tight')
-        plt.show()
+        pylab.savefig("rv_full.png", dpi=150,
+                      bbox_inches='tight')
+        # plt.show()
 
     def plot_eclipse(self, t_start, period):
         mod_flux, mod_rv = self.optimizer.model()
@@ -313,8 +313,8 @@ class Analyzer(object):
                 bottom_plots[j].set_ylim(-0.004, 0.004)
                 # bottom_plots[j].autoscale(tight=True)
 
-            # plt.show()
-
-            plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
-                          bbox_inches='tight')
-            plt.close()
+            plt.show()
+            #
+            # plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
+            # bbox_inches='tight')
+            # plt.close()
