@@ -33,13 +33,14 @@ class Optimizer(object):
 
     def save(self, chain_out_file="chain.txt", photo_out_file="photo_model.txt",
              rv_out_file="rv_model.txt"):
-        mod_flux, mod_rv = self.model()
-        mod_rv = self.filled_rv_model()
+        if False:
+            mod_flux, mod_rv = self.model()
+            mod_rv = self.filled_rv_model()
+            np.savetxt(photo_out_file, mod_flux)
+            np.savetxt(rv_out_file, mod_rv)
+            np.savetxt(chain_out_file, self.chain)
 
-        np.savetxt(chain_out_file, self.chain)
         np.save("chain", self.chain)
-        np.savetxt(photo_out_file, mod_flux)
-        np.savetxt(rv_out_file, mod_rv)
 
     def model(self, nprocs=1):
         flux_x, rv_x = self.photo_data[0], self.rv_data[0]

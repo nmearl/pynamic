@@ -56,6 +56,10 @@ class Analyzer(object):
                 if param.vary:
                     print("{0:12s} {1:12g} {2:12g} {3:12g}".format(
                         param.name, qval, quperr, qlowerr))
+                    print(
+                    "${0:g}\substack{{+\SI{{{1:e}}}{{}} \\ -\SI{{{2:e}}}{{"
+                    "}}}}$".format(
+                        qval, quperr, qlowerr))
 
                     f.write("{0:12s} {1:12g} {2:12g} {3:12g}\n".format(
                         param.name, qval, quperr, qlowerr))
@@ -78,7 +82,7 @@ class Analyzer(object):
         elif method == 'chi':
             self.chi(param_list=param_list, show=True)
 
-    def save(self, method, param_list=None, prefix='hist'):
+    def save_plot(self, method, param_list=None, prefix='hist'):
         if not os.path.exists("./plots"):
             os.mkdir("./plots")
 
@@ -184,16 +188,17 @@ class Analyzer(object):
                 axes[j].set_title(title)  # , x=0.85, y=0.85)
                 axes[j].set_ylabel("Count")
 
-                axes[j].hist(samples, 1000, color="k", alpha=0.5,
+                axes[j].hist(samples, 5000, color="k", alpha=0.5,
                              histtype="step", facecolor='gray')
                 axes[j].axvline(qval, color="r", lw=2)
                 axes[j].axvline(qval + quperr, color='k', ls='-.')
                 axes[j].axvline(qval - qlowerr, color='k', ls='-.')
-                axes[j].axvline(cp, ls='--')
-                axes[j].set_xlim(qval * 0.9, qval * 1.1)
+                # axes[j].axvline(cp, ls='--')
+                axes[j].set_xlim(qval * 0.98, qval * 1.02)
 
             plt.savefig("dist_{0}.png".format(gparam[0].name), dpi=300,
                         bbox_inches='tight')
+            plt.close()
 
     def plot_flux(self, save=False, show=True, prefix='plot_flux'):
         mod_flux, mod_rv = self.optimizer.model()
@@ -201,19 +206,6 @@ class Analyzer(object):
         pylab.plot(self.optimizer.photo_data[0],
                    self.optimizer.photo_data[1], 'k+')
         pylab.plot(self.optimizer.photo_data[0], mod_flux, 'r')
-
-        if save:
-            pylab.savefig('./plots/{0}.png'.format(prefix))
-        if show:
-            pylab.show()
-
-        pylab.close()
-
-    def plot_rv(self, save=False, show=True, prefix='plot_rv'):
-        mod_rv = self.optimizer.filled_rv_model()
-
-        pylab.plot(self.optimizer.rv_data[0], self.optimizer.rv_data[1], 'k.')
-        pylab.plot(self.optimizer.photo_data[0], mod_rv, 'r')
 
         if save:
             pylab.savefig('./plots/{0}.png'.format(prefix))
@@ -230,14 +222,14 @@ class Analyzer(object):
 
         rv_x, rv_y, rv_e = self.optimizer.rv_data
 
-        rv_e /= 5.775e-4
-        rv_y = (rv_y / 5.775e-4) - 0.26 - 27.278
+        # rv_e /= 5.775e-4
+        # rv_y = (rv_y / 5.775e-4) # - 0.26 - 27.278
         mod_rv = (mod_rv / 5.775e-4) - 0.26 - 27.278
         filled_rv = (filled_rv / 5.775e-4) - 0.26 - 27.278
 
         gs = gridspec.GridSpec(3, 1)
         fig = plt.figure()
-        fig.subplots_adjust(hspace=0.05)
+        # fig.subplots_adjust(hspace=0.05)
 
         # fig.set_size_inches(11, 8.5)
 
@@ -252,23 +244,27 @@ class Analyzer(object):
         plt.setp(top_plot.get_xticklabels(), visible=False)
         top_plot.set_xlim(45, 505)
         bottom_plot.set_xlim(45, 505)
-        bottom_plot.set_ylim(-0.5, 0.5)
+        # bottom_plot.set_ylim(-0.7, 0.7)
 
         top_plot.plot(rv_x, rv_y, 'ko')
-        top_plot.plot(rv_x, mod_rv, 'bD')
+        # top_plot.plot(rv_x, mod_rv, 'bD')
         top_plot.plot(filled_x, filled_rv, 'r')
 
         bottom_plot.errorbar(rv_x, rv_y - mod_rv,
-                             yerr=rv_e, fmt='o')
+                             yerr=rv_e, color='k', fmt='o')
         bottom_plot.axhline(0.0, ls='--', color='k', alpha=0.5)
-        plt.show()
+        pylab.savefig("rv_full.png", dpi=150,
+                      bbox_inches='tight')
+        # plt.show()
 
     def plot_eclipse(self, t_start, period):
         mod_flux, mod_rv = self.optimizer.model()
         time = self.optimizer.photo_data[0]
         flux = self.optimizer.photo_data[1]
 
+        ieclipse = -1
         for i in np.arange(t_start, time[-1], period * 4):
+            ieclipse += 1
             gs = gridspec.GridSpec(3, 4)
             fig = plt.figure()
             fig.subplots_adjust(hspace=0.05, wspace=0.05)
@@ -307,8 +303,10 @@ class Analyzer(object):
                          rotation=15)
 
             top_plots[0].set_ylabel("Normalized Flux")
-            bottom_plots[0].set_ylabel('Time (BJD - 2,455,000)')
-            bottom_plots[0].set_xlabel("Residuals")
+            # bottom_plots[0].set_xlabel('Time (BJD - 2,455,000)')
+            fig.text(0.5, 0.04, 'Time (BJD - 2,455,000)', ha='center',
+                     va='center')
+            bottom_plots[0].set_ylabel("Residuals")
             spacing = 0.5
 
             for j in range(4):
@@ -327,5 +325,6 @@ class Analyzer(object):
 
             # plt.show()
 
-            pylab.savefig("resid_{0}.png".format(i), dpi=150,
+            plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
                           bbox_inches='tight')
+            plt.close()
