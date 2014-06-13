@@ -12,17 +12,11 @@ plt.rc('font', serif='Times New Roman')
 
 
 class Analyzer(object):
-    def __init__(self, optimizer, path="chain.txt"):
+    def __init__(self, optimizer):
         self.optimizer = optimizer
 
         # burnin = int(0.5 * len(self.optimizer.chain))
         self.samples = self.optimizer.chain
-
-        if path:
-            if ".txt" in path:
-                self.samples = np.loadtxt(path, ndmin=2)
-            elif ".npy" in path:
-                self.samples = np.load(path)
 
         results = map(lambda v: (v[1], v[2] - v[1], v[1] - v[0]),
                            zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
@@ -35,12 +29,8 @@ class Analyzer(object):
             param.lower_error = results[i][2]
 
     def report(self):
-        mod_flux, mod_rv = self.optimizer.model()
-        chisq = np.sum(((self.optimizer.photo_data[1] - mod_flux)
-                        / self.optimizer.photo_data[2]) ** 2)
-        deg = len(self.optimizer.params.get_flat(True))
-        nu = self.optimizer.photo_data[1].size - 1.0 - deg
-        redchisq = chisq / nu
+        self.optimizer.iterout()
+        redchisq = self.optimizer.redchisq
 
         print("Reduced Chi-squared: {0}".format(redchisq))
 
@@ -222,10 +212,10 @@ class Analyzer(object):
 
         rv_x, rv_y, rv_e = self.optimizer.rv_data
 
-        # rv_e /= 5.775e-4
-        # rv_y = (rv_y / 5.775e-4) # - 0.26 - 27.278
-        mod_rv = (mod_rv / 5.775e-4) - 0.26 - 27.278
-        filled_rv = (filled_rv / 5.775e-4) - 0.26 - 27.278
+        rv_e /= 5.775e-4
+        rv_y = (rv_y / 5.775e-4)  # - 0.26 - 27.278
+        mod_rv = (mod_rv / 5.775e-4)  # - 0.26 - 27.278
+        filled_rv = (filled_rv / 5.775e-4)  # - 0.26 - 27.278
 
         gs = gridspec.GridSpec(3, 1)
         fig = plt.figure()
@@ -253,9 +243,9 @@ class Analyzer(object):
         bottom_plot.errorbar(rv_x, rv_y - mod_rv,
                              yerr=rv_e, color='k', fmt='o')
         bottom_plot.axhline(0.0, ls='--', color='k', alpha=0.5)
-        pylab.savefig("rv_full.png", dpi=150,
-                      bbox_inches='tight')
-        # plt.show()
+        # pylab.savefig("rv_full.png", dpi=150,
+        # bbox_inches='tight')
+        plt.show()
 
     def plot_eclipse(self, t_start, period):
         mod_flux, mod_rv = self.optimizer.model()

@@ -82,8 +82,8 @@ class Parameter(object):
             return self.value / 2.959122E-4
         elif "radius" in self.name:
             return self.value * 215.1
-        elif ("inc" in self.name or "om" in self.name or "ln" in self.name
-              or "ma" in self.name):
+        elif ("inc_" in self.name or "om_" in self.name or "ln_" in self.name
+              or "ma_" in self.name):
             return np.rad2deg(self.value)
         else:
             return self.value

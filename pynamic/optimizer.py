@@ -6,7 +6,7 @@ import numpy as np
 
 class Optimizer(object):
     def __init__(self, params, photo_data_file='', rv_data_file='', rv_body=0,
-                 output_prefix=''):
+                 chain_file=None):
         self.params = params
         self.photo_data = np.loadtxt(photo_data_file,
                                      unpack=True, usecols=(0, 1, 2))
@@ -17,11 +17,13 @@ class Optimizer(object):
                                       unpack=True, usecols=(0, 1, 2))
 
         self.rv_body = rv_body
-        self.output_prefix = output_prefix
         self.chain = np.zeros([1, 1 + len(self.params.all(True))])
         self.maxlnp = np.inf
         self.bestpos = np.zeros(len(self.params.all(True)))
         self.redchisq = 0.0
+
+        if chain_file:
+            self.chain = np.load(chain_file)
 
     def run(self, method=None, **kwargs):
         if method == 'mcmc':
@@ -61,16 +63,22 @@ class Optimizer(object):
 
         return mod_rv
 
-    def iterout(self, tlnl, theta, mod_flux):
-        self.params.save()
-        self.save()
-        self.bestpos = theta
-        self.params.update_parameters(theta)
+    def iterout(self, tlnl=-np.inf, theta=None):
+        if theta:
+            self.params.save()
+            self.save()
+            self.bestpos = theta
+            self.params.update_parameters(theta)
 
+        mod_flux, mod_rv = self.model()
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
                         self.photo_data[2]) ** 2)
+
+        chisq += np.sum(((self.rv_data[1] - mod_rv) /
+                         self.rv_data[2]) ** 2)
+
         deg = len(self.params.get_flat(True))
-        nu = self.photo_data[1].size - 1 - deg
+        nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
         self.redchisq = chisq / nu
 
         # Update the maxlnp so the Watcher knows to print to screen

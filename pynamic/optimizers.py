@@ -73,8 +73,7 @@ def hammer(optimizer, nwalkers=None, niterations=500, nprocs=1):
         bestpos = pos[maxlnprob, :]
 
         if abs(lnp[maxlnprob]) < abs(optimizer.maxlnp):
-            mod_flux, mod_rv = optimizer.model(nprocs)
-            optimizer.iterout(lnp[maxlnprob], bestpos, mod_flux)
+            optimizer.iterout(lnp[maxlnprob], bestpos)
 
         for k in range(pos.shape[0]):
             if not np.isnan(lnp[k]):
@@ -91,8 +90,7 @@ def minimizer(optimizer, method=None, nprocs=1):
     optimizer.params.update_parameters(result["x"])
     tlnl = -2 * lnlike(result["x"], optimizer)
 
-    mod_flux, mod_rv = optimizer.model(nprocs)
-    optimizer.iterout(tlnl, result["x"], mod_flux)
+    optimizer.iterout(tlnl, result["x"])
 
     nobj = np.append(tlnl, result["x"])
     optimizer.chain = np.vstack([optimizer.chain, nobj])

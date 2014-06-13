@@ -106,4 +106,5 @@ def generate(params, time, rv_body, nprocs=1):
 
     result = np.array(result)
 
-    return np.concatenate(result[:, 0]), np.concatenate(result[:, 1])
+    return np.concatenate(result[:, 0]), np.concatenate(result[:, 1])  # +
+    # params.get("gamma_0").value
