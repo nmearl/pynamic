@@ -247,6 +247,40 @@ class Analyzer(object):
                       bbox_inches='tight')
         # plt.show()
 
+    def plot_mass_radius(self):
+        names = ["Star B", "Star C", "Star A"]
+        params = self.optimizer.params
+
+        plt.subplot(2, 1, 1)
+        for i in range(int(params.get("nbodies").value)):
+            mass = params.get("mass_{0}".format(i)).get_real_quantile()
+            radius = params.get("radius_{0}".format(i)).get_real_quantile()
+
+            plt.errorbar(radius[0], mass[0],
+                         xerr=[[radius[1], ], [radius[2], ]],
+                         yerr=[[mass[1], ], [mass[2], ]], fmt='o',
+                         label=names[i])
+
+        plt.subplot(2, 3, 4)
+        mass = params.get("mass_0").get_real_quantile()
+        radius = params.get("radius_0").get_real_quantile()
+        plt.errorbar(radius[0], mass[0], xerr=[[radius[1], ], [radius[2], ]],
+                     yerr=[[mass[1], ], [mass[2], ]], fmt='o', label=names[i])
+
+        plt.subplot(2, 3, 5)
+        mass = params.get("mass_1").get_real_quantile()
+        radius = params.get("radius_1").get_real_quantile()
+        plt.errorbar(radius[0], mass[0], xerr=[[radius[1], ], [radius[2], ]],
+                     yerr=[[mass[1], ], [mass[2], ]], fmt='o', label=names[i])
+
+        plt.subplot(2, 3, 6)
+        mass = params.get("mass_2").get_real_quantile()
+        radius = params.get("radius_2").get_real_quantile()
+        plt.errorbar(radius[0], mass[0], xerr=[[radius[1], ], [radius[2], ]],
+                     yerr=[[mass[1], ], [mass[2], ]], fmt='o', label=names[i])
+
+        plt.show()
+
     def plot_eclipse(self, t_start, period):
         mod_flux, mod_rv = self.optimizer.model()
         time = self.optimizer.photo_data[0]
@@ -313,8 +347,8 @@ class Analyzer(object):
                 bottom_plots[j].set_ylim(-0.004, 0.004)
                 # bottom_plots[j].autoscale(tight=True)
 
-            plt.show()
-            #
-            # plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
-            # bbox_inches='tight')
-            # plt.close()
+            # plt.show()
+
+            plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
+                        bbox_inches='tight')
+            plt.close()

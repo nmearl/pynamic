@@ -67,11 +67,11 @@ class Optimizer(object):
         self.chain = np.vstack([self.chain, nobj])
 
     def iterout(self, tlnl=-np.inf, theta=None):
-        if abs(tlnl) > abs(self.maxlnp) or not np.isfinite(tlnl):
+        if abs(tlnl) < abs(self.maxlnp) or not np.isfinite(tlnl):
             if theta is not None:
+                self.params.update_parameters(theta)
                 self.params.save()
                 self.save()
-                self.params.update_parameters(theta)
 
         mod_flux, mod_rv = self.model()
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
@@ -84,6 +84,6 @@ class Optimizer(object):
         nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
         self.redchisq = chisq / nu
 
-        if abs(tlnl) > abs(self.maxlnp) or not np.isfinite(tlnl):
+        if abs(tlnl) < abs(self.maxlnp) or not np.isfinite(tlnl):
             # Update the maxlnp so the Watcher knows to print to screen
             self.maxlnp = tlnl
