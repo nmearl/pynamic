@@ -46,7 +46,7 @@ class Optimizer(object):
         flux_x, rv_x = self.photo_data[0], self.rv_data[0]
         x = np.append(flux_x, rv_x)
 
-        flux_inds = np.in1d(x, flux_x, assume_unique=False)
+        flux_inds = np.in1d(x, flux_x, assume_unique=True)
         rv_inds = np.in1d(x, rv_x, assume_unique=True)
 
         mod_flux, mod_rv = photometry.generate(self.params, x,
