@@ -70,12 +70,12 @@ class Optimizer(object):
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
                         self.photo_data[2]) ** 2)
 
-        # chisq += np.sum(((self.rv_data[1] - mod_rv) /
-        # self.rv_data[2]) ** 2)
+        chisq += np.sum(((self.rv_data[1] - mod_rv) /
+                         self.rv_data[2]) ** 2)
 
         deg = len(self.params.get_flat(True))
-        # nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
-        nu = self.photo_data[1].size - 1.0 - deg
+        nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
+        # nu = self.photo_data[1].size - 1.0 - deg
         return chisq / nu
 
     def iterout(self, tlnl=-np.inf, theta=None, max=True):

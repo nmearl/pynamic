@@ -32,10 +32,15 @@ def lnlike(dtheta, optimizer, nprocs=1):
     flnl = -0.5 * (np.sum((optimizer.photo_data[1] - mod_flux) ** 2 * inv_sigma2
                           - np.log(inv_sigma2)))
 
+    rinv_sigma2 = 1.0 / (
+        optimizer.rv_data[2] ** 2 + mod_rv ** 2 * np.exp(2 * -np.inf))
+    rvlnl = -0.5 * (np.sum((optimizer.rv_data[1] - mod_rv) ** 2 * rinv_sigma2
+                           - np.log(rinv_sigma2)))
+
     # rvlnl = (-0.5 * ((mod_rv - optimizer.rv_data[1]) /
     #                  optimizer.rv_data[2]) ** 2)
 
-    tlnl = np.sum(flnl)  # + np.sum(rvlnl)
+    tlnl = np.sum(flnl) + np.sum(rvlnl)
 
     return tlnl
 
