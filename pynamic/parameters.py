@@ -10,6 +10,9 @@ class Parameters(object):
         self.odict = OrderedDict()
         self._read_input(input_file)
 
+        if "ferr_frac" not in self.odict.keys():
+            self.add("ferr_frac", 0.0, 0.0, 1.0, False)
+
     def _read_input(self, input_file):
         with open(input_file, 'r') as f:
             for line in f:

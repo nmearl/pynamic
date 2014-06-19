@@ -78,8 +78,10 @@ class Optimizer(object):
         nu = self.photo_data[1].size - 1.0 - deg
         return chisq / nu
 
-    def iterout(self, tlnl=-np.inf, theta=None):
-        if abs(tlnl) < abs(self.maxlnp) or not np.isfinite(tlnl):
+    def iterout(self, tlnl=-np.inf, theta=None, max=True):
+        improved = tlnl > self.maxlnp if max else tlnl < self.maxlnp
+
+        if improved or not np.isfinite(tlnl):
             if theta is not None:
                 self.params.update(theta)
                 self.params.save()
