@@ -22,15 +22,40 @@ class Analyzer(object):
                            zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
                                               axis=0)))
 
-        for i in range(len(self.optimizer.params.all(True))):
-            param = self.optimizer.params.all(True)[i]
+        for i in range(len(self.optimizer.params.get_all(True))):
+            param = self.optimizer.params.get_all(True)[i]
             param.quantile_value = results[i][0]
             param.upper_error = results[i][1]
             param.lower_error = results[i][2]
 
+        params = self.optimizer.params
+        N = int(params.get("nbodies").value)
+
+        self.masses = np.array([params.get('mass_{0}'.format(i)).value
+                                for i in range(N)])
+        self.radii = np.array([params.get('radius_{0}'.format(i)).value
+                               for i in range(N)])
+        self.fluxes = np.array([params.get('flux_{0}'.format(i)).value
+                                for i in range(N)])
+        self.u1 = np.array(
+            [params.get('u1_{0}'.format(i)).value for i in range(N)])
+        self.u2 = np.array(
+            [params.get('u2_{0}'.format(i)).value for i in range(N)])
+        self.a = np.array(
+            [params.get('a_{0}'.format(i)).value for i in range(1, N)])
+        self.e = np.array(
+            [params.get('e_{0}'.format(i)).value for i in range(1, N)])
+        self.inc = np.array(
+            [params.get('inc_{0}'.format(i)).value for i in range(1, N)])
+        self.om = np.array(
+            [params.get('om_{0}'.format(i)).value for i in range(1, N)])
+        self.ln = np.array(
+            [params.get('ln_{0}'.format(i)).value for i in range(1, N)])
+        self.ma = np.array(
+            [params.get('ma_{0}'.format(i)).value for i in range(1, N)])
+
     def report(self):
-        self.optimizer.iterout()
-        redchisq = self.optimizer.redchisq
+        redchisq = self.optimizer.redchisq()
 
         print("Reduced Chi-squared: {0}".format(redchisq))
 
@@ -39,8 +64,8 @@ class Analyzer(object):
 
         j = 0
         with open("report.out", 'w') as f:
-            for i in range(len(self.optimizer.params.all())):
-                param = self.optimizer.params.all()[i]
+            for i in range(len(self.optimizer.params.get_all())):
+                param = self.optimizer.params.get_all()[i]
                 qval, quperr, qlowerr = param.get_real_quantile()
 
                 if param.vary:
@@ -87,35 +112,23 @@ class Analyzer(object):
             self.chi(param_list=param_list, save=True, show=False)
 
     def chi(self, param_list=None, show=True, save=False):
-        for i in range(1, len(self.optimizer.params.all(True))):
+        for i in range(1, len(self.optimizer.params.get_all(True))):
             pylab.plot(self.samples[:, i], self.samples[:, 0], '+')
             pylab.show()
 
-    def plot_histogram(self):
+    def plot_histogram(self, show=False, save=False):
         carter_params = [(0.2413, 0.2127, 1.347), (.2318, .2543, 2.0254),
                          (3.26e-4, 2.24e-4, 1.0), (0.0, 0.0, 0.39),
                          (0.0, 0.0, 0.22),
                          (0.021986, 0.2495), (0.02234, 0.3043),
                          (96.907, 92.100), (89.52, 52.88), (8.012, 0.0),
                          (355.66, 19.87)]
-        params = self.optimizer.params.all(True)
+        params = self.optimizer.params.get_all(True)
 
         titles = ["Star B", "Star C", "Star A"]
 
-        masses = [x for x in params if "mass" in x.name]
-        radii = [x for x in params if "radius" in x.name]
-        fluxes = [x for x in params if "flux" in x.name]
-        ld1 = [x for x in params if "u1" in x.name]
-        ld2 = [x for x in params if "u2" in x.name]
-        sm_axes = [x for x in params if x.name[:2] == 'a_']
-        eccs = [x for x in params if "e_" in x.name]
-        incs = [x for x in params if "inc_" in x.name]
-        oms = [x for x in params if "om_" in x.name]
-        lns = [x for x in params if "ln_" in x.name]
-        mas = [x for x in params if "ma_" in x.name]
-
-        gparams = [masses, radii, fluxes, ld1, ld2, sm_axes, eccs, incs, oms,
-                   lns, mas]
+        gparams = [self.masses, self.radii, self.fluxes, self.u1, self.u2,
+                   self.a, self.e, self.inc, self.om, self.ln, self.ma]
         si = 0
 
         for i in range(len(gparams)):
@@ -173,7 +186,7 @@ class Analyzer(object):
                               "ln" in param.name or "ma" in param.name):
                     samples = np.rad2deg(samples)
 
-                qval, quperr, qlowerr = param.get_real_quantile()
+                qval, qupper, qlowerr = param.get_real_quantile()
 
                 axes[j].set_title(title)  # , x=0.85, y=0.85)
                 axes[j].set_ylabel("Count")
@@ -181,13 +194,18 @@ class Analyzer(object):
                 axes[j].hist(samples, 5000, color="k", alpha=0.5,
                              histtype="step", facecolor='gray')
                 axes[j].axvline(qval, color="r", lw=2)
-                axes[j].axvline(qval + quperr, color='k', ls='-.')
+                axes[j].axvline(qval + qupper, color='k', ls='-.')
                 axes[j].axvline(qval - qlowerr, color='k', ls='-.')
                 # axes[j].axvline(cp, ls='--')
-                axes[j].set_xlim(qval * 0.98, qval * 1.02)
+                axes[j].set_xlim((qval - qlowerr) * 0.98,
+                                 (qval + qupper) * 1.02)
 
-            plt.savefig("dist_{0}.png".format(gparam[0].name), dpi=300,
-                        bbox_inches='tight')
+            if save:
+                plt.savefig("dist_{0}.png".format(gparam[0].name), dpi=300,
+                            bbox_inches='tight')
+            if show:
+                plt.show()
+
             plt.close()
 
     def plot_flux(self, save=False, show=True, prefix='plot_flux'):
@@ -204,7 +222,7 @@ class Analyzer(object):
 
         pylab.close()
 
-    def plot_rv_full(self):
+    def plot_rv_full(self, show=False, save=False):
         mod_flux, mod_rv = self.optimizer.model()
         filled_x = np.linspace(50, 500, 1000)
         filled_rv = self.optimizer.filled_rv_model(
@@ -243,9 +261,14 @@ class Analyzer(object):
         bottom_plot.errorbar(rv_x, rv_y - mod_rv,
                              yerr=rv_e, color='k', fmt='o')
         bottom_plot.axhline(0.0, ls='--', color='k', alpha=0.5)
-        pylab.savefig("rv_full.png", dpi=150,
-                      bbox_inches='tight')
-        # plt.show()
+
+        if save:
+            pylab.savefig("rv_full.png", dpi=150,
+                          bbox_inches='tight')
+        if show:
+            plt.show()
+
+        plt.close()
 
     def plot_mass_radius(self):
         names = ["Star B", "Star C", "Star A"]
@@ -281,7 +304,7 @@ class Analyzer(object):
 
         plt.show()
 
-    def plot_eclipse(self, t_start, period):
+    def plot_eclipse(self, t_start, period, show=False, save=False):
         mod_flux, mod_rv = self.optimizer.model()
         time = self.optimizer.photo_data[0]
         flux = self.optimizer.photo_data[1]
@@ -347,8 +370,10 @@ class Analyzer(object):
                 bottom_plots[j].set_ylim(-0.004, 0.004)
                 # bottom_plots[j].autoscale(tight=True)
 
-            # plt.show()
+            if save:
+                plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
+                            bbox_inches='tight')
+            if show:
+                plt.show()
 
-            plt.savefig("resid_{0}.png".format(ieclipse), dpi=150,
-                        bbox_inches='tight')
             plt.close()

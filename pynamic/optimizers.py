@@ -20,21 +20,27 @@ def lnprior(dtheta, params):
 
 
 def lnlike(dtheta, optimizer, nprocs=1):
-    optimizer.params.update_parameters(dtheta)
+    optimizer.params.update(dtheta)
     mod_flux, mod_rv = optimizer.model(nprocs)
 
-    flnl = (-0.5 * ((mod_flux - optimizer.photo_data[1]) /
-                    optimizer.photo_data[2]) ** 2)
-    rvlnl = (-0.5 * ((mod_rv - optimizer.rv_data[1]) /
-                     optimizer.rv_data[2]) ** 2)
+    lnf = np.log(optimizer.params.get("ferr_frac").value)
+    # flnl = (-0.5 * ((mod_flux - optimizer.photo_data[1]) /
+    # optimizer.photo_data[2]) ** 2)
+    inv_sigma2 = 1.0 / (
+    optimizer.photo_data[2] ** 2 + mod_flux ** 2 * np.exp(2 * lnf))
+    flnl = -0.5 * (np.sum((optimizer.photo_data[1] - mod_flux) ** 2 * inv_sigma2
+                          - np.log(inv_sigma2)))
 
-    tlnl = np.sum(flnl) + np.sum(rvlnl)
+    # rvlnl = (-0.5 * ((mod_rv - optimizer.rv_data[1]) /
+    #                  optimizer.rv_data[2]) ** 2)
+
+    tlnl = np.sum(flnl)  # + np.sum(rvlnl)
 
     return tlnl
 
 
 def lnprob(dtheta, optimizer, nprocs=1):
-    lp = lnprior(dtheta, optimizer.params.all(True))
+    lp = lnprior(dtheta, optimizer.params.get_all(True))
 
     if not np.isfinite(lp):
         return -np.inf
@@ -87,7 +93,7 @@ def minimizer(optimizer, method=None, nprocs=1):
 def multinest(optimizer, nprocs=1):
     # number of dimensions our problem has
     parameters = ["{0}".format(i)
-                  for i in range(len(optimizer.params.all(True)))]
+                  for i in range(len(optimizer.params.get_all(True)))]
     nparams = len(parameters)
 
     if not os.path.exists('chains'):
@@ -96,8 +102,8 @@ def multinest(optimizer, nprocs=1):
     def lnprior(cube, ndim, nparams):
         theta = np.array([cube[i] for i in range(ndim)])
 
-        for i in range(len(optimizer.params.all(True))):
-            param = optimizer.params.all(True)[i]
+        for i in range(len(optimizer.params.get_all(True))):
+            param = optimizer.params.get_all(True)[i]
 
             if "mass_" in param.name:
                 theta[i] = 10 ** (theta[i] * 8 - 9)
@@ -124,7 +130,7 @@ def multinest(optimizer, nprocs=1):
     def lnlike(cube, ndim, nparams):
         theta = np.array([cube[i] for i in range(ndim)])
 
-        optimizer.params.update_parameters(theta)
+        optimizer.params.update(theta)
         mod_flux, mod_rv = optimizer.model(nprocs)
 
         flnl = -(0.5 * ((mod_flux - optimizer.photo_data[1]) /

@@ -33,13 +33,16 @@ class Parameters(object):
 
         return self.odict.items()[index][1]
 
-    def get_flat(self, can_vary=False):
-        if can_vary:
+    def get_flat(self, can_vary=False, quantile=False):
+        if can_vary and quantile:
+            return np.array([x.quantile_value
+                             for x in self.odict.values() if x.vary])
+        elif can_vary:
             return np.array([x.value for x in self.odict.values() if x.vary])
 
         return np.array([x.value for x in self.odict.values()])
 
-    def all(self, can_vary=False):
+    def get_all(self, can_vary=False):
         if can_vary:
             return [x for x in self.odict.values() if x.vary]
 
@@ -51,9 +54,9 @@ class Parameters(object):
 
         return [(x.min, x.max) for x in self.odict.values()]
 
-    def update_parameters(self, theta):
+    def update(self, theta):
         for i in range(len(theta)):
-            p = self.all(True)[i]
+            p = self.get_all(True)[i]
             p.value = theta[i]
 
     def save(self):
