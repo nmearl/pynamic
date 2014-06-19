@@ -24,7 +24,7 @@ def lnlike(dtheta, optimizer, nprocs=1):
     mod_flux, mod_rv = optimizer.model(nprocs)
 
     f = optimizer.params.get("ferr_frac").value
-    lnf = np.log(f) if f == 0.0 else -np.inf
+    lnf = np.log(f) if f != 0.0 else -np.inf
     # flnl = (-0.5 * ((mod_flux - optimizer.photo_data[1]) /
     # optimizer.photo_data[2]) ** 2)
     inv_sigma2 = 1.0 / (
