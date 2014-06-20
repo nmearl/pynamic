@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
-plt.rc('font', family='serif')
-plt.rc('font', serif='Times New Roman')
+# plt.rc('font', family='serif')
+# plt.rc('font', serif='Times New Roman')
 
 
 class Analyzer(object):
@@ -29,34 +29,40 @@ class Analyzer(object):
             param.lower_error = results[i][2]
 
         params = self.optimizer.params
+        params.update(self.samples[
+                      np.argmax(self.samples[:, 0][self.samples[:, 0] != 0.0]),
+                      1:])
+
         N = int(params.get("nbodies").value)
 
-        self.masses = np.array([params.get('mass_{0}'.format(i)).value
-                                for i in range(N)])
-        self.radii = np.array([params.get('radius_{0}'.format(i)).value
-                               for i in range(N)])
-        self.fluxes = np.array([params.get('flux_{0}'.format(i)).value
-                                for i in range(N)])
+        self.masses = np.array([params.get('mass_{0}'.format(i))
+                                for i in [1, 0, 2]])
+        self.radii = np.array([params.get('radius_{0}'.format(i))
+                               for i in [1, 0, 2]])
+        self.fluxes = np.array([params.get('flux_{0}'.format(i))
+                                for i in [1, 0, 2]])
         self.u1 = np.array(
-            [params.get('u1_{0}'.format(i)).value for i in range(N)])
+            [params.get('u1_{0}'.format(i)) for i in [1, 0, 2]])
         self.u2 = np.array(
-            [params.get('u2_{0}'.format(i)).value for i in range(N)])
+            [params.get('u2_{0}'.format(i)) for i in [1, 0, 2]])
         self.a = np.array(
-            [params.get('a_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('a_{0}'.format(i)) for i in [1, 2]])
         self.e = np.array(
-            [params.get('e_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('e_{0}'.format(i)) for i in [1, 2]])
         self.inc = np.array(
-            [params.get('inc_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('inc_{0}'.format(i)) for i in [1, 2]])
         self.om = np.array(
-            [params.get('om_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('om_{0}'.format(i)) for i in [1, 2]])
         self.ln = np.array(
-            [params.get('ln_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('ln_{0}'.format(i)) for i in [1, 2]])
         self.ma = np.array(
-            [params.get('ma_{0}'.format(i)).value for i in range(1, N)])
+            [params.get('ma_{0}'.format(i)) for i in [1, 2]])
 
     def report(self):
         redchisq = self.optimizer.redchisq()
+        likelihood = np.max(self.samples[:, 0][self.samples[:, 0] != 0.0])
 
+        print("Likelihood: {0}".format(likelihood))
         print("Reduced Chi-squared: {0}".format(redchisq))
 
         print("{0:12s} {1:12s} {2:12s} {3:12s}".format(
@@ -161,8 +167,8 @@ class Analyzer(object):
             else:
                 par_name = ""
 
-            # fig.subplots_adjust(hspace=0.33)
-            fig.set_size_inches(8.5, 11)
+            fig.subplots_adjust(hspace=0.33)
+            # fig.set_size_inches(8.5, 11)
             axes[-1].set_xlabel("{0}".format(par_name))
 
             for j in range(len(gparam)):
@@ -213,7 +219,9 @@ class Analyzer(object):
 
         pylab.plot(self.optimizer.photo_data[0],
                    self.optimizer.photo_data[1], 'k+')
-        pylab.plot(self.optimizer.photo_data[0], mod_flux, 'r')
+        pylab.plot(self.optimizer.photo_data[0][
+                       np.argsort(self.optimizer.photo_data[0])],
+                   mod_flux[np.argsort(self.optimizer.photo_data[0])], 'r')
 
         if save:
             pylab.savefig('./plots/{0}.png'.format(prefix))
@@ -317,7 +325,7 @@ class Analyzer(object):
             fig.subplots_adjust(hspace=0.05, wspace=0.05)
             # fig.tight_layout()
 
-            fig.set_size_inches(11, 8.5)
+            # fig.set_size_inches(11, 8.5)
 
             top_plots, bottom_plots = [], []
 
@@ -361,7 +369,8 @@ class Analyzer(object):
                                       i + period * j + spacing)
                 top_plots[j].set_ylim(0.968, 1.005)
                 top_plots[j].plot(time, flux, 'k.')
-                top_plots[j].plot(time, mod_flux, 'r')
+                top_plots[j].plot(time[np.argsort(time)],
+                                  mod_flux[np.argsort(time)], 'r')
                 # top_plots[j].autoscale(tight=True)
 
                 bottom_plots[j].set_xlim(i + period * j - spacing,
