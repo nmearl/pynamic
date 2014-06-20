@@ -65,7 +65,7 @@ class Parameters(object):
     def save(self):
         with open("current.out", "w") as f:
             for param in self.odict.values():
-                f.write("{0:12s} {1:f} {2:12g} {3:12g} {4:4d}\n".format(
+                f.write("{0:12s} {1} {2:12g} {3:12g} {4:4d}\n".format(
                     param.name, param.value, param.min, param.max, param.vary
                 ))
 
