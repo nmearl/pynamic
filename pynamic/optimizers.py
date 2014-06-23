@@ -38,12 +38,12 @@ def lnlike(dtheta, optimizer, nprocs=1):
 
     tinv_sigma2 = 1.0 / (
         optimizer.rv_data[2][:10] ** 2 + mod_rv[:10] ** 2 * np.exp(2 * -np.inf))
-    trvlnl = -0.5 * (np.sum((optimizer.rv_data[1][:10] + mod_rv[:10]) ** 2 *
+    trvlnl = -0.5 * (np.sum((optimizer.rv_data[1][:10] - mod_rv[:10]) ** 2 *
                             tinv_sigma2 - np.log(tinv_sigma2)))
 
     mrinv_sigma2 = 1.0 / (
         optimizer.rv_data[2][10:] ** 2 + mod_rv[10:] ** 2 * np.exp(2 * -np.inf))
-    mrvlnl = -0.5 * (np.sum((optimizer.rv_data[1][10:] + mod_rv[10:]) ** 2 *
+    mrvlnl = -0.5 * (np.sum((optimizer.rv_data[1][10:] - mod_rv[10:]) ** 2 *
                             mrinv_sigma2 - np.log(mrinv_sigma2)))
 
     tlnl = np.sum(flnl) + np.sum(trvlnl) + np.sum(mrvlnl)
