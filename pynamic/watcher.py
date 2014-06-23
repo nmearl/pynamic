@@ -39,6 +39,8 @@ class Watcher(Progress):
         nbodies = int(params.get('nbodies').value)
 
         ferr_frac = params.get("ferr_frac").value
+        trv_corr = params.get("gamma_t").value
+        mrv_corr = params.get("gamma_m").value
 
         masses = np.array([params.get('mass_{0}'.format(i)).value
                            for i in range(nbodies)])
@@ -67,6 +69,10 @@ class Watcher(Progress):
         print('Likelihood: {0} | Red. Chisq: {1} | {2} | {3}'.format(
             self.maxlnp, self.optimizer.redchisq(),
             str(datetime.datetime.now().time()), ferr_frac))
+        print('-' * 83)
+        print("TRES Gamma: {0} | McDonald Gamma: {1}".format(
+            trv_corr, mrv_corr
+        ))
         print('-' * 83)
         print('System parameters')
         print('-' * 83)

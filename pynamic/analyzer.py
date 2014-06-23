@@ -29,9 +29,9 @@ class Analyzer(object):
             param.lower_error = results[i][2]
 
         params = self.optimizer.params
-        params.update(self.samples[
-                      np.argmax(self.samples[:, 0]),
-                      1:])
+        # params.update(self.samples[
+        # np.argmax(self.samples[:, 0]),
+        #               1:])
 
         N = int(params.get("nbodies").value)
 
@@ -60,7 +60,8 @@ class Analyzer(object):
 
     def report(self):
         redchisq = self.optimizer.redchisq()
-        likelihood = np.max(self.samples[:, 0][self.samples[:, 0] != 0.0])
+        likelihood = 0.0  # np.max(self.samples[:, 0][self.samples[:, 0] !=
+        # 0.0])
 
         print("Likelihood: {0}".format(likelihood))
         print("Reduced Chi-squared: {0}".format(redchisq))
@@ -242,6 +243,16 @@ class Analyzer(object):
         mod_rv = (mod_rv / 5.775e-4)  # - 0.26 - 27.278
         filled_rv = (filled_rv / 5.775e-4)  # - 0.26 - 27.278
 
+        print(mod_rv)
+        # REMOVE THIS LATER
+        trv_corr = self.optimizer.params.get("gamma_t").get_real()
+        mrv_corr = self.optimizer.params.get("gamma_m").get_real()
+        mod_rv[:10] += trv_corr
+        mod_rv[10:] += mrv_corr
+        filled_rv += (trv_corr + mrv_corr) * 0.5
+
+        print(mod_rv)
+
         gs = gridspec.GridSpec(3, 1)
         fig = plt.figure()
         # fig.subplots_adjust(hspace=0.05)
@@ -262,11 +273,13 @@ class Analyzer(object):
         # bottom_plot.set_ylim(-0.7, 0.7)
 
         top_plot.plot(rv_x, rv_y, 'ko')
-        # top_plot.plot(rv_x, mod_rv, 'bD')
+        top_plot.plot(rv_x, mod_rv, 'bD')
         top_plot.plot(filled_x, filled_rv, 'r')
 
-        bottom_plot.errorbar(rv_x, rv_y - mod_rv,
-                             yerr=rv_e, color='k', fmt='o')
+        bottom_plot.errorbar(rv_x[:10], rv_y[:10] - mod_rv[:10],
+                             yerr=rv_e[:10], color='k', fmt='o')
+        bottom_plot.errorbar(rv_x[10:], rv_y[10:] - mod_rv[10:],
+                             yerr=rv_e[10:], color='k', fmt='o')
         bottom_plot.axhline(0.0, ls='--', color='k', alpha=0.5)
 
         if save:

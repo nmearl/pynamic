@@ -69,8 +69,15 @@ class Optimizer(object):
         chisq = np.sum(((self.photo_data[1] - mod_flux) /
                         self.photo_data[2]) ** 2)
 
-        chisq += np.sum(((self.rv_data[1] - mod_rv) /
-                         self.rv_data[2]) ** 2)
+        # REMOVE LATER
+        trv_corr = self.params.get("gamma_t").value
+        mrv_corr = self.params.get("gamma_m").value
+
+        chisq += np.sum(((self.rv_data[1][:10] - (mod_rv[:10] + trv_corr)) /
+                         self.rv_data[2][:10]) ** 2)
+
+        chisq += np.sum(((self.rv_data[1][10:] - (mod_rv[10:] + mrv_corr)) /
+                         self.rv_data[2][10:]) ** 2)
 
         deg = len(self.params.get_flat(True))
         nu = self.photo_data[1].size + self.rv_data[1].size - 1.0 - deg
