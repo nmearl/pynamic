@@ -19,8 +19,8 @@ class Analyzer(object):
         self.samples = self.optimizer.chain
 
         results = map(lambda v: (v[1], v[2] - v[1], v[1] - v[0]),
-                           zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
-                                              axis=0)))
+                      zip(*np.percentile(self.samples[:, 1:], [16, 50, 84],
+                                         axis=0)))
 
         for i in range(len(self.optimizer.params.get_all(True))):
             param = self.optimizer.params.get_all(True)[i]
@@ -30,7 +30,7 @@ class Analyzer(object):
 
         params = self.optimizer.params
         params.update(self.samples[
-                      np.argmax(self.samples[:, 0][self.samples[:, 0] != 0.0]),
+                      np.argmax(self.samples[:, 0]),
                       1:])
 
         N = int(params.get("nbodies").value)
@@ -78,9 +78,9 @@ class Analyzer(object):
                     print("{0:12s} {1:12g} {2:12g} {3:12g}".format(
                         param.name, qval, quperr, qlowerr))
                     print(
-                    "${0:g}\substack{{+\SI{{{1:e}}}{{}} \\ -\SI{{{2:e}}}{{"
-                    "}}}}$".format(
-                        qval, quperr, qlowerr))
+                        "${0:g}\substack{{+\SI{{{1:e}}}{{}} \\ -\SI{{{2:e}}}{{"
+                        "}}}}$".format(
+                            qval, quperr, qlowerr))
 
                     f.write("{0:12s} {1:12g} {2:12g} {3:12g}\n".format(
                         param.name, qval, quperr, qlowerr))
@@ -219,9 +219,8 @@ class Analyzer(object):
 
         pylab.plot(self.optimizer.photo_data[0],
                    self.optimizer.photo_data[1], 'k+')
-        pylab.plot(self.optimizer.photo_data[0][
-                       np.argsort(self.optimizer.photo_data[0])],
-                   mod_flux[np.argsort(self.optimizer.photo_data[0])], 'r')
+        pylab.plot(self.optimizer.photo_data[0],
+                   mod_flux, 'r')
 
         if save:
             pylab.savefig('./plots/{0}.png'.format(prefix))

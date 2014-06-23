@@ -25,22 +25,22 @@ def lnlike(dtheta, optimizer, nprocs=1):
 
     f = optimizer.params.get("ferr_frac").value
     lnf = np.log(f) if f != 0.0 else -np.inf
-    # flnl = (-0.5 * ((mod_flux - optimizer.photo_data[1]) /
-    # optimizer.photo_data[2]) ** 2)
     inv_sigma2 = 1.0 / (
     optimizer.photo_data[2] ** 2 + mod_flux ** 2 * np.exp(2 * lnf))
     flnl = -0.5 * (np.sum((optimizer.photo_data[1] - mod_flux) ** 2 * inv_sigma2
                           - np.log(inv_sigma2)))
 
-    rinv_sigma2 = 1.0 / (
-        optimizer.rv_data[2] ** 2 + mod_rv ** 2 * np.exp(2 * -np.inf))
-    rvlnl = -0.5 * (np.sum((optimizer.rv_data[1] - mod_rv) ** 2 * rinv_sigma2
-                           - np.log(rinv_sigma2)))
+    tinv_sigma2 = 1.0 / (
+        optimizer.rv_data[2][:10] ** 2 + mod_rv[:10] ** 2 * np.exp(2 * -np.inf))
+    trvlnl = -0.5 * (np.sum((optimizer.rv_data[1][:10] - mod_rv[:10]) ** 2 *
+                            tinv_sigma2 - np.log(tinv_sigma2)))
 
-    # rvlnl = (-0.5 * ((mod_rv - optimizer.rv_data[1]) /
-    #                  optimizer.rv_data[2]) ** 2)
+    mrinv_sigma2 = 1.0 / (
+        optimizer.rv_data[2][10:] ** 2 + mod_rv[10:] ** 2 * np.exp(2 * -np.inf))
+    mrvlnl = -0.5 * (np.sum((optimizer.rv_data[1][10:] - mod_rv[10:]) ** 2 *
+                            mrinv_sigma2 - np.log(mrinv_sigma2)))
 
-    tlnl = np.sum(flnl) + np.sum(rvlnl)
+    tlnl = np.sum(flnl) + np.sum(trvlnl) + np.sum(mrvlnl)
 
     return tlnl
 
