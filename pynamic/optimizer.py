@@ -21,7 +21,8 @@ class Optimizer(object):
         self.maxlnp = -np.inf
 
         if chain_file:
-            self.chain = np.load(chain_file)
+            self.chain = np.load(chain_file)[975001:, :]
+            print(self.chain.shape)
 
     def run(self, method=None, **kwargs):
         if method == 'mcmc':

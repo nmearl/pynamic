@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
-# plt.rc('font', family='serif')
-# plt.rc('font', serif='Times New Roman')
+plt.rc('font', family='serif')
+plt.rc('font', serif='Times New Roman')
 
 
 class Analyzer(object):
@@ -31,7 +31,7 @@ class Analyzer(object):
         params = self.optimizer.params
         # params.update(self.samples[
         # np.argmax(self.samples[:, 0]),
-        #               1:])
+        # 1:])
 
         N = int(params.get("nbodies").value)
 
@@ -79,7 +79,8 @@ class Analyzer(object):
                     print("{0:12s} {1:12g} {2:12g} {3:12g}".format(
                         param.name, qval, quperr, qlowerr))
                     print(
-                        "${0:g}\substack{{+\SI{{{1:e}}}{{}} \\ -\SI{{{2:e}}}{{"
+                        "$\SI{{{0:e}}}{{}}\substack{{+\SI{{{1:e}}}{{}} \\ "
+                        "-\SI{{{2:e}}}{{"
                         "}}}}$".format(
                             qval, quperr, qlowerr))
 
@@ -162,9 +163,13 @@ class Analyzer(object):
             elif "om_" in gparam[0].name:
                 par_name = "Argument of Pericenter (deg)"
             elif "ln_" in gparam[0].name:
-                par_name = "Line of Nodal Longitude (deg)"
+                par_name = "Longitude of Ascending Node (deg)"
             elif "ma_" in gparam[0].name:
                 par_name = "Mean Anomaly (deg)"
+            elif "gamma_t" == gparam[0].name:
+                par_name = "TRES Correction (km/s)"
+            elif "gamma_m" == gparam[0].name:
+                par_name = "McDonald Correction (km/s)"
             else:
                 par_name = ""
 
@@ -192,13 +197,15 @@ class Analyzer(object):
                 elif ("inc" in param.name or "om" in param.name or
                               "ln" in param.name or "ma" in param.name):
                     samples = np.rad2deg(samples)
+                elif "gamma" in param.name:
+                    samples /= 5.775e-4
 
                 qval, qupper, qlowerr = param.get_real_quantile()
 
                 axes[j].set_title(title)  # , x=0.85, y=0.85)
                 axes[j].set_ylabel("Count")
 
-                axes[j].hist(samples, 5000, color="k", alpha=0.5,
+                axes[j].hist(samples, 1000, color="k", alpha=0.5,
                              histtype="step", facecolor='gray')
                 axes[j].axvline(qval, color="r", lw=2)
                 axes[j].axvline(qval + qupper, color='k', ls='-.')
@@ -273,7 +280,7 @@ class Analyzer(object):
         # bottom_plot.set_ylim(-0.7, 0.7)
 
         top_plot.plot(rv_x, rv_y, 'ko')
-        top_plot.plot(rv_x, mod_rv, 'bD')
+        # top_plot.plot(rv_x, mod_rv, 'bD')
         top_plot.plot(filled_x, filled_rv, 'r')
 
         bottom_plot.errorbar(rv_x[:10], rv_y[:10] - mod_rv[:10],
