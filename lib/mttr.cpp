@@ -6,7 +6,7 @@
 /* (c) 2011; Pal, A. (apal@szofi.net)					     */
 /*****************************************************************************/
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <iostream>
 #include <string.h> 
 #include <memory.h> 
