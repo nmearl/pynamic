@@ -1,6 +1,0 @@
-# Add the -fopenmp flag to have C++ multicore
-# On linux:
-g++ -shared -Wl,-soname,photodynam -fPIC -O3 -o photodynam.so photodynam.cpp n_body.cpp n_body_state.cpp n_body_lc.cpp elliptic.c icirc.c scpolyint.c mttr.c
-
-# On mac:
-/usr/local/Cellar/gcc48/4.8.2/bin/g++-4.8 -shared -Wl,-install_name,photodynam-mac.so -o photodynam-mac.so -fPIC photodynam.cpp n_body.cpp n_body_state.cpp n_body_lc.cpp elliptic.c icirc.c scpolyint.c mttr.c
