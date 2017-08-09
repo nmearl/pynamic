@@ -187,13 +187,8 @@ double mttr_flux_general(circle *circles,int ncircle,double c0,double c1,double 
 
  icirc_arclist_free(arcs,narc);
 
- if ( 0.0<f0 ) {
- 	// cout << " " << endl;
- 	// cout << fc << endl;
- 	// cout << f0 << endl;
- 	// cout << " " << endl;
+ if ( 0.0<f0 )
 	return(fc/f0);
-}
  else
 	return(0.0);
 }
